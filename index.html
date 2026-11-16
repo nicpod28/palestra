@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
+<title>Palestra</title>
+<style>
+  :root {
+    --sfondo: #f4f5f7; --carta: #ffffff; --testo: #111418; --tenue: #4d5560;
+    --bordo: #c9ced6; --accento: #0b57d0; --su-accento: #ffffff;
+    --pericolo: #b3261e; --su-pericolo: #ffffff; --evidenza: #e3ecfb;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --sfondo: #0e0f12; --carta: #1b1d22; --testo: #f2f3f5; --tenue: #b4bac4;
+      --bordo: #474c55; --accento: #8ab4f8; --su-accento: #0a1a33;
+      --pericolo: #ffb4ab; --su-pericolo: #4a0d08; --evidenza: #22304a;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--sfondo); color: var(--testo);
+    font: 17px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+  header {
+    position: sticky; top: 0; z-index: 5; background: var(--sfondo);
+    display: flex; align-items: center; gap: 4px;
+    padding: calc(8px + env(safe-area-inset-top)) 12px 8px;
+    border-bottom: 1px solid var(--bordo);
+  }
+  header h1 { font-size: 20px; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+  .indietro {
+    min-width: 48px; min-height: 48px; display: inline-flex; align-items: center; justify-content: center;
+    font-size: 26px; text-decoration: none; color: var(--testo); border-radius: 12px;
+  }
+  main { padding: 12px; max-width: 640px; margin: 0 auto; }
+  h2 { font-size: 16px; margin: 20px 4px 8px; color: var(--tenue); text-transform: uppercase; letter-spacing: .04em; }
+  p { margin: 8px 4px; }
+  .tenue { color: var(--tenue); }
+  .carta { background: var(--carta); border: 1px solid var(--bordo); border-radius: 14px; padding: 12px; margin: 0 0 12px; }
+
+  /* Liste di righe toccabili */
+  ul.lista { list-style: none; margin: 0 0 12px; padding: 0; }
+  .riga {
+    display: flex; align-items: stretch; gap: 6px; background: var(--carta);
+    border: 1px solid var(--bordo); border-radius: 14px; margin-bottom: 8px; padding: 6px;
+  }
+  .riga-corpo {
+    flex: 1; min-width: 0; min-height: 48px; display: flex; flex-direction: column; justify-content: center;
+    padding: 4px 8px; color: var(--testo); text-decoration: none; overflow-wrap: anywhere;
+  }
+  .riga-corpo small { color: var(--tenue); font-size: 14px; }
+  .etichetta-attiva {
+    display: inline-block; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px;
+    background: var(--accento); color: var(--su-accento); margin-left: 6px; vertical-align: middle;
+  }
+
+  /* Pulsanti */
+  button { font: inherit; color: inherit; cursor: pointer; }
+  .btn {
+    min-height: 48px; padding: 10px 16px; border-radius: 12px; border: 1px solid var(--bordo);
+    background: var(--carta); color: var(--testo); font-weight: 600; width: 100%; margin-bottom: 8px;
+  }
+  .btn.primario { background: var(--accento); color: var(--su-accento); border-color: var(--accento); }
+  .btn.pericolo { color: var(--pericolo); border-color: var(--pericolo); }
+  .btn.pericolo.pieno { background: var(--pericolo); color: var(--su-pericolo); }
+  .icona {
+    min-width: 48px; min-height: 48px; border-radius: 12px; border: 1px solid var(--bordo);
+    background: var(--sfondo); font-size: 20px; font-weight: 700; padding: 0;
+  }
+  .icona:disabled { opacity: .3; }
+  .icona.pericolo { color: var(--pericolo); }
+  button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 3px solid var(--accento); outline-offset: 2px;
+  }
+
+  /* Campi */
+  label { display: block; font-size: 14px; font-weight: 600; color: var(--tenue); margin: 10px 2px 4px; }
+  input[type=text], textarea {
+    width: 100%; min-height: 48px; padding: 10px 12px; font: inherit; color: var(--testo);
+    background: var(--sfondo); border: 1px solid var(--bordo); border-radius: 12px;
+  }
+  textarea { min-height: 80px; resize: vertical; }
+  .in-linea { display: flex; gap: 8px; align-items: end; }
+  .in-linea > div { flex: 1; min-width: 0; }
+  .in-linea > div.stretto { flex: 0 0 84px; }
+  .serie-riga { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .serie-riga span { flex: 0 0 68px; font-weight: 600; }
+  .serie-riga input { flex: 1; min-width: 0; }
+  .suggerimenti { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .suggerimenti button {
+    min-height: 48px; text-align: left; padding: 8px 12px; border-radius: 12px;
+    border: 1px dashed var(--accento); background: var(--evidenza); color: var(--testo);
+  }
+  .suggerimenti small { display: block; color: var(--tenue); font-size: 13px; }
+
+  /* Barra in basso */
+  nav {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 10; display: flex;
+    background: var(--carta); border-top: 1px solid var(--bordo);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  nav a {
+    flex: 1; min-height: 60px; display: flex; align-items: center; justify-content: center;
+    text-decoration: none; color: var(--tenue); font-weight: 600; font-size: 15px;
+    border-top: 3px solid transparent;
+  }
+  nav a[aria-current=page] { color: var(--accento); border-top-color: var(--accento); }
+
+  /* Finestra di conferma e avvisi */
+  .velo {
+    position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.55);
+    display: flex; align-items: flex-end; justify-content: center; padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  .finestra {
+    background: var(--carta); color: var(--testo); border-radius: 16px; padding: 16px;
+    width: 100%; max-width: 480px; max-height: 90vh; overflow: auto; border: 1px solid var(--bordo);
+  }
+  .finestra h3 { margin: 0 0 8px; font-size: 19px; }
+  .finestra .btn { margin-top: 8px; margin-bottom: 0; }
+  #avviso {
+    position: fixed; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 30;
+    background: var(--testo); color: var(--sfondo); padding: 12px 14px; border-radius: 12px;
+    font-weight: 600; text-align: center; max-width: 616px; margin: 0 auto;
+  }
+  #avviso.errore { background: var(--pericolo); color: var(--su-pericolo); }
+  #avviso[hidden] { display: none; }
+</style>
+</head>
+<body>
+<header id="testata"></header>
+<main id="vista"></main>
+<nav id="barra" aria-label="Sezioni">
+  <a href="#allenamento" data-tab="allenamento">Allenamento</a>
+  <a href="#scheda" data-tab="scheda">Scheda</a>
+  <a href="#dati" data-tab="dati">Dati</a>
+</nav>
+<div id="avviso" role="status" aria-live="polite" hidden></div>
+
+<script>
+'use strict';
+
+/* ====================================================================
+   PARTE 1: LOGICA DEI DATI
+   Nessuna di queste funzioni tocca la pagina: solo dati e salvataggio.
+   ==================================================================== */
+
+const CHIAVE = 'palestra.dati';
+const CHIAVE_ILLEGGIBILI = 'palestra.datiIlleggibili';
+const VERSIONE = 1;
+const MAX_SERIE = 20;
+
+let dati = null;          // tutti i dati dell'app
+let erroreCaricamento = null; // 'illeggibili' | 'futuro' | null
+
+function datiVuoti() {
+  return {
+    schemaVersion: VERSIONE,
+    ultimoBackup: null,
+    schedaAttivaId: null,
+    catalogo: [],
+    schede: [],
+    allenamenti: []
+  };
+}
+
+// Migrazioni future: la funzione alla chiave N porta i dati dalla versione N alla N+1.
+const MIGRAZIONI = {
+  // 1: function (d) { ...modifiche...; d.schemaVersion = 2; return d; }
+};
+
+function migra(d) {
+  if (!d || typeof d !== 'object' || typeof d.schemaVersion !== 'number') throw new Error('illeggibili');
+  if (d.schemaVersion > VERSIONE) throw new Error('futuro');
+  while (d.schemaVersion < VERSIONE) {
+    const passo = MIGRAZIONI[d.schemaVersion];
+    if (!passo) throw new Error('illeggibili');
+    d = passo(d);
+  }
+  return d;
+}
+
+function carica() {
+  erroreCaricamento = null;
+  let testo = null;
+  try { testo = localStorage.getItem(CHIAVE); } catch (e) { /* memoria non accessibile */ }
+  if (testo === null) { dati = datiVuoti(); return; }
+  try {
+    dati = migra(JSON.parse(testo));
+  } catch (e) {
+    // Non sovrascrivo mai dati che non so leggere.
+    dati = null;
+    erroreCaricamento = e.message === 'futuro' ? 'futuro' : 'illeggibili';
+  }
+}
+
+// Salva subito. Restituisce false se il telefono rifiuta la scrittura.
+function salva() {
+  if (!dati) return false;
+  try {
+    localStorage.setItem(CHIAVE, JSON.stringify(dati));
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+// Mette da parte i dati illeggibili e riparte da zero.
+function ripartiDaZero() {
+  try {
+    const vecchi = localStorage.getItem(CHIAVE);
+    if (vecchi !== null) localStorage.setItem(CHIAVE_ILLEGGIBILI, vecchi);
+  } catch (e) { /* niente da fare */ }
+  dati = datiVuoti();
+  erroreCaricamento = null;
+  return salva();
+}
+
+function nuovoId(prefisso) {
+  return prefisso + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+// Toglie spazi all'inizio, alla fine e doppi.
+function pulisciTesto(t) {
+  return String(t == null ? '' : t).replace(/\s+/g, ' ').trim();
+}
+
+// Forma usata per confrontare i nomi: senza maiuscole né spazi in eccesso.
+function normalizzaNome(t) {
+  return pulisciTesto(t).toLowerCase();
+}
+
+// Numero intero tra min e max, oppure null se il testo non è valido.
+function leggiIntero(testo, min, max) {
+  const t = String(testo == null ? '' : testo).trim();
+  if (!/^\d+$/.test(t)) return null;
+  const n = Number(t);
+  return n >= min && n <= max ? n : null;
+}
+
+function sposta(lista, indice, direzione) {
+  const altro = indice + direzione;
+  if (indice < 0 || altro < 0 || altro >= lista.length) return false;
+  const tmp = lista[indice]; lista[indice] = lista[altro]; lista[altro] = tmp;
+  return true;
+}
+
+/* ---- Catalogo esercizi ---- */
+
+function esercizioPerId(id) {
+  return dati.catalogo.find(function (e) { return e.id === id; }) || null;
+}
+
+function esercizioPerNome(nome) {
+  const n = normalizzaNome(nome);
+  return dati.catalogo.find(function (e) { return normalizzaNome(e.nome) === n; }) || null;
+}
+
+function nomeEsercizio(id) {
+  const e = esercizioPerId(id);
+  return e ? e.nome : '(esercizio sconosciuto)';
+}
+
+// Restituisce l'esercizio del catalogo con quel nome; se manca lo crea.
+function ottieniOCreaEsercizio(nome) {
+  const esistente = esercizioPerNome(nome);
+  if (esistente) return esistente;
+  const nuovo = { id: nuovoId('es'), nome: pulisciTesto(nome) };
+  dati.catalogo.push(nuovo);
+  return nuovo;
+}
+
+// Nomi del catalogo che somigliano al testo scritto (prima quelli che iniziano uguale).
+function suggerisciEsercizi(testo) {
+  const n = normalizzaNome(testo);
+  if (!n) return [];
+  const trovati = dati.catalogo.filter(function (e) { return normalizzaNome(e.nome).indexOf(n) !== -1; });
+  trovati.sort(function (a, b) {
+    const ia = normalizzaNome(a.nome).indexOf(n) === 0 ? 0 : 1;
+    const ib = normalizzaNome(b.nome).indexOf(n) === 0 ? 0 : 1;
+    return ia - ib || a.nome.localeCompare(b.nome, 'it');
+  });
+  return trovati.slice(0, 6);
+}
+
+// Toglie dal catalogo gli esercizi che nessuna scheda e nessun allenamento usa più.
+function pulisciCatalogo() {
+  const usati = {};
+  dati.schede.forEach(function (s) {
+    s.giorni.forEach(function (g) {
+      g.esercizi.forEach(function (v) { usati[v.esercizioId] = true; });
+    });
+  });
+  dati.allenamenti.forEach(function (a) {
+    (a.esercizi || []).forEach(function (v) { usati[v.esercizioId] = true; });
+  });
+  dati.catalogo = dati.catalogo.filter(function (e) { return usati[e.id]; });
+}
+
+/* ---- Schede ---- */
+
+function schedaPerId(id) {
+  return dati.schede.find(function (s) { return s.id === id; }) || null;
+}
+
+function creaScheda(nome) {
+  const scheda = { id: nuovoId('sch'), nome: pulisciTesto(nome), creataIl: new Date().toISOString(), giorni: [] };
+  dati.schede.push(scheda);
+  // La prima scheda diventa attiva da sola.
+  if (!schedaPerId(dati.schedaAttivaId)) dati.schedaAttivaId = scheda.id;
+  salva();
+  return scheda;
+}
+
+function rinominaScheda(scheda, nome) { scheda.nome = pulisciTesto(nome); salva(); }
+
+function attivaScheda(scheda) { dati.schedaAttivaId = scheda.id; salva(); }
+
+function cancellaScheda(scheda) {
+  dati.schede = dati.schede.filter(function (s) { return s.id !== scheda.id; });
+  if (dati.schedaAttivaId === scheda.id) dati.schedaAttivaId = null;
+  pulisciCatalogo();
+  salva();
+}
+
+/* ---- Giorni ---- */
+
+function giornoPerId(scheda, id) {
+  return scheda.giorni.find(function (g) { return g.id === id; }) || null;
+}
+
+function creaGiorno(scheda, nome) {
+  const giorno = { id: nuovoId('gio'), nome: pulisciTesto(nome), esercizi: [] };
+  scheda.giorni.push(giorno);
+  salva();
+  return giorno;
+}
+
+function rinominaGiorno(giorno, nome) { giorno.nome = pulisciTesto(nome); salva(); }
+
+function cancellaGiorno(scheda, giorno) {
+  scheda.giorni = scheda.giorni.filter(function (g) { return g.id !== giorno.id; });
+  pulisciCatalogo();
+  salva();
+}
+
+function spostaGiorno(scheda, giornoId, direzione) {
+  const i = scheda.giorni.findIndex(function (g) { return g.id === giornoId; });
+  if (sposta(scheda.giorni, i, direzione)) salva();
+}
+
+/* ---- Esercizi di un giorno ("voci") e serie ---- */
+
+function vocePerId(giorno, id) {
+  return giorno.esercizi.find(function (v) { return v.id === id; }) || null;
+}
+
+function serieUguali(numero, ripetizioni) {
+  const serie = [];
+  for (let i = 0; i < numero; i++) serie.push({ ripetizioni: ripetizioni });
+  return serie;
+}
+
+function aggiungiVoce(giorno, nome, numeroSerie, ripetizioni) {
+  const voce = {
+    id: nuovoId('ve'),
+    esercizioId: ottieniOCreaEsercizio(nome).id,
+    recupero: '',
+    nota: '',
+    serie: serieUguali(numeroSerie, pulisciTesto(ripetizioni))
+  };
+  giorno.esercizi.push(voce);
+  salva();
+  return voce;
+}
+
+function cambiaEsercizioVoce(voce, nome) {
+  voce.esercizioId = ottieniOCreaEsercizio(nome).id;
+  pulisciCatalogo();
+  salva();
+}
+
+function cancellaVoce(giorno, voce) {
+  giorno.esercizi = giorno.esercizi.filter(function (v) { return v.id !== voce.id; });
+  pulisciCatalogo();
+  salva();
+}
+
+function spostaVoce(giorno, voceId, direzione) {
+  const i = giorno.esercizi.findIndex(function (v) { return v.id === voceId; });
+  if (sposta(giorno.esercizi, i, direzione)) salva();
+}
+
+function generaSerie(voce, numero, ripetizioni) {
+  voce.serie = serieUguali(numero, pulisciTesto(ripetizioni));
+  salva();
+}
+
+function aggiungiSerie(voce) {
+  const ultima = voce.serie[voce.serie.length - 1];
+  voce.serie.push({ ripetizioni: ultima ? ultima.ripetizioni : '' });
+  salva();
+}
+
+function togliSerie(voce, indice) { voce.serie.splice(indice, 1); salva(); }
+
+function modificaSerie(voce, indice, ripetizioni) {
+  if (!voce.serie[indice]) return;
+  voce.serie[indice].ripetizioni = String(ripetizioni).trim();
+  salva();
+}
+
+function modificaCampoVoce(voce, campo, valore) {
+  if (campo !== 'recupero' && campo !== 'nota') return;
+  voce[campo] = String(valore).trim();
+  salva();
+}
+
+// True se tutte le serie hanno le stesse ripetizioni.
+function serieTutteUguali(voce) {
+  return voce.serie.every(function (s) { return s.ripetizioni === voce.serie[0].ripetizioni; });
+}
+
+// Riassunto breve: "4 × 8-10" oppure "12 / 10 / 8 / 6".
+function riassuntoSerie(voce) {
+  if (!voce.serie.length) return 'nessuna serie';
+  if (serieTutteUguali(voce)) return voce.serie.length + ' × ' + (voce.serie[0].ripetizioni || '?');
+  return voce.serie.map(function (s) { return s.ripetizioni || '?'; }).join(' / ');
+}
+
+function plurale(n, singolare, pluraleTesto) { return n + ' ' + (n === 1 ? singolare : pluraleTesto); }
+
+/* ====================================================================
+   PARTE 2: INTERFACCIA
+   Legge i dati, disegna la pagina e chiama le funzioni della Parte 1.
+   ==================================================================== */
+
+const elTestata = document.getElementById('testata');
+const elVista = document.getElementById('vista');
+const elAvviso = document.getElementById('avviso');
+let rotta = { tab: 'allenamento' };
+let timerAvviso = null;
+
+// Rende sicuro un testo prima di inserirlo nell'HTML.
+function esc(t) {
+  return String(t == null ? '' : t).replace(/[&<>"']/g, function (c) {
+    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+  });
+}
+
+function avviso(testo, errore) {
+  elAvviso.textContent = testo;
+  elAvviso.className = errore ? 'errore' : '';
+  elAvviso.hidden = false;
+  clearTimeout(timerAvviso);
+  timerAvviso = setTimeout(function () { elAvviso.hidden = true; }, errore ? 5000 : 2500);
+}
+
+// Avvisa se l'ultimo salvataggio non è riuscito.
+function controllaSalvataggio() {
+  try {
+    if (localStorage.getItem(CHIAVE) !== JSON.stringify(dati)) throw new Error();
+  } catch (e) {
+    avviso('Attenzione: salvataggio non riuscito. La memoria del telefono potrebbe essere piena.', true);
+  }
+}
+
+/* ---- Finestra di conferma / inserimento testo ----
+   opzioni: titolo, testo, ok, pericolo, campo { etichetta, valore, segnaposto, suggerimenti }
+   Restituisce una Promise: true/false per le conferme, testo/null per i campi. */
+function apriFinestra(opzioni) {
+  return new Promise(function (risolvi) {
+    const precedente = document.activeElement;
+    const velo = document.createElement('div');
+    velo.className = 'velo';
+    const campo = opzioni.campo;
+    velo.innerHTML =
+      '<div class="finestra" role="dialog" aria-modal="true" aria-labelledby="fin-titolo">' +
+        '<h3 id="fin-titolo">' + esc(opzioni.titolo) + '</h3>' +
+        (opzioni.testo ? '<p>' + esc(opzioni.testo) + '</p>' : '') +
+        (campo ? '<label for="fin-campo">' + esc(campo.etichetta) + '</label>' +
+          '<input type="text" id="fin-campo" maxlength="80" autocomplete="off" enterkeyhint="done" placeholder="' +
+          esc(campo.segnaposto || '') + '" value="' + esc(campo.valore || '') + '">' +
+          '<div class="suggerimenti" id="fin-sugg"></div>' : '') +
+        '<button class="btn ' + (opzioni.pericolo ? 'pericolo pieno' : 'primario') + '" data-fin="ok">' + esc(opzioni.ok || 'Conferma') + '</button>' +
+        '<button class="btn" data-fin="no">Annulla</button>' +
+      '</div>';
+    document.body.appendChild(velo);
+    const input = velo.querySelector('#fin-campo');
+    const sugg = velo.querySelector('#fin-sugg');
+
+    function chiudi(esito) {
+      document.removeEventListener('keydown', suTasto);
+      velo.remove();
+      if (precedente && precedente.focus && document.contains(precedente)) precedente.focus();
+      risolvi(esito);
+    }
+    function conferma() {
+      if (!campo) return chiudi(true);
+      const valore = pulisciTesto(input.value);
+      if (!valore) { avviso('Scrivi un nome: il campo è vuoto.', true); input.focus(); return; }
+      chiudi(valore);
+    }
+    function suTasto(e) {
+      if (e.key === 'Escape') chiudi(campo ? null : false);
+      if (e.key === 'Enter' && campo) { e.preventDefault(); conferma(); }
+    }
+    velo.addEventListener('click', function (e) {
+      const b = e.target.closest('button');
+      if (e.target === velo) return chiudi(campo ? null : false);
+      if (!b) return;
+      if (b.dataset.fin === 'ok') conferma();
+      else if (b.dataset.fin === 'no') chiudi(campo ? null : false);
+      else if (b.dataset.sugg !== undefined) { input.value = b.dataset.sugg; sugg.innerHTML = ''; input.focus(); }
+    });
+    document.addEventListener('keydown', suTasto);
+    if (campo) {
+      if (campo.suggerimenti) {
+        input.addEventListener('input', function () { sugg.innerHTML = htmlSuggerimenti(input.value); });
+      }
+      input.focus(); input.select();
+    } else {
+      velo.querySelector('[data-fin="no"]').focus();
+    }
+  });
+}
+
+function chiediConferma(titolo, testo, ok) {
+  return apriFinestra({ titolo: titolo, testo: testo, ok: ok || 'Cancella', pericolo: true });
+}
+
+function chiediNome(titolo, etichetta, valore, segnaposto, suggerimenti) {
+  return apriFinestra({ titolo: titolo, campo: { etichetta: etichetta, valore: valore, segnaposto: segnaposto, suggerimenti: suggerimenti } });
+}
+
+function htmlSuggerimenti(testo) {
+  return suggerisciEsercizi(testo).map(function (e) {
+    return '<button type="button" data-sugg="' + esc(e.nome) + '">' + esc(e.nome) +
+      '<small>già nel catalogo: tocca per usarlo</small></button>';
+  }).join('');
+}
+
+/* ---- Navigazione: l'indirizzo dopo # dice quale schermata mostrare ---- */
+
+function leggiRotta() {
+  const p = location.hash.replace(/^#/, '').split('/').map(decodeURIComponent);
+  const r = { tab: ['allenamento', 'scheda', 'dati'].indexOf(p[0]) !== -1 ? p[0] : 'allenamento' };
+  if (r.tab === 'scheda' && dati) {
+    r.scheda = p[1] ? schedaPerId(p[1]) : null;
+    r.giorno = r.scheda && p[2] === 'g' && p[3] ? giornoPerId(r.scheda, p[3]) : null;
+    r.nuovo = !!(r.giorno && p[4] === 'nuovo');
+    r.voce = r.giorno && p[4] === 'e' && p[5] ? vocePerId(r.giorno, p[5]) : null;
+  }
+  return r;
+}
+
+function linkScheda(s) { return '#scheda/' + s.id; }
+function linkGiorno(s, g) { return linkScheda(s) + '/g/' + g.id; }
+function linkVoce(s, g, v) { return linkGiorno(s, g) + '/e/' + v.id; }
+
+function vai(hash) {
+  if (location.hash === hash) disegna(); else location.hash = hash;
+}
+
+function testata(titolo, indietro) {
+  elTestata.innerHTML =
+    (indietro ? '<a class="indietro" href="' + indietro + '" aria-label="Indietro">‹</a>' : '') +
+    '<h1>' + esc(titolo) + '</h1>';
+  document.title = titolo + ' · Palestra';
+}
+
+function disegna() {
+  if (erroreCaricamento) return disegnaErrore();
+  rotta = leggiRotta();
+  document.querySelectorAll('#barra a').forEach(function (a) {
+    if (a.dataset.tab === rotta.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  if (rotta.tab === 'dati') return vistaDati();
+  if (rotta.tab === 'allenamento') return vistaAllenamento();
+  if (rotta.voce) return vistaVoce();
+  if (rotta.nuovo) return vistaNuovaVoce();
+  if (rotta.giorno) return vistaGiorno();
+  if (rotta.scheda) return vistaScheda();
+  return vistaSchede();
+}
+
+/* ---- Schermate ---- */
+
+function disegnaErrore() {
+  testata('Palestra');
+  document.getElementById('barra').hidden = true;
+  if (erroreCaricamento === 'futuro') {
+    elVista.innerHTML = '<div class="carta"><p><strong>Dati creati da una versione più recente dell\'app.</strong></p>' +
+      '<p>Questa versione non può leggerli e non li tocca. Aggiorna l\'app e riprova.</p></div>';
+  } else {
+    elVista.innerHTML = '<div class="carta"><p><strong>I dati salvati non sono leggibili.</strong></p>' +
+      '<p>Non sono stati modificati. Puoi ripartire da zero: i dati illeggibili vengono messi da parte, non cancellati.</p></div>' +
+      '<button class="btn pericolo" data-az="riparti">Riparti da zero</button>';
+  }
+}
+
+function vistaAllenamento() {
+  testata('Allenamento');
+  const attiva = schedaPerId(dati.schedaAttivaId);
+  if (!attiva) {
+    elVista.innerHTML = '<div class="carta"><p><strong>Nessuna scheda attiva.</strong></p>' +
+      '<p class="tenue">Crea una scheda o scegline una come attiva nella sezione Scheda.</p></div>' +
+      '<a class="btn primario" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#scheda">Vai alla sezione Scheda</a>';
+    return;
+  }
+  elVista.innerHTML = '<h2>Scheda attiva</h2><div class="carta"><strong>' + esc(attiva.nome) + '</strong><br>' +
+    '<span class="tenue">' + plurale(attiva.giorni.length, 'giorno', 'giorni') + '</span></div>' +
+    '<p class="tenue">La registrazione degli allenamenti arriva nella Fase 2.</p>';
+}
+
+function vistaDati() {
+  testata('Dati');
+  elVista.innerHTML = '<div class="carta"><p><strong>I dati sono salvati su questo dispositivo.</strong></p>' +
+    '<p class="tenue">' + plurale(dati.schede.length, 'scheda', 'schede') + ', ' +
+    plurale(dati.catalogo.length, 'esercizio', 'esercizi') + ' nel catalogo.</p></div>' +
+    '<p class="tenue">Esportazione e importazione del backup arrivano nella sotto-fase 1c.</p>';
+}
+
+function vistaSchede() {
+  testata('Schede');
+  let html = '';
+  if (!dati.schede.length) {
+    html += '<div class="carta"><p><strong>Nessuna scheda.</strong></p><p class="tenue">Creane una per iniziare.</p></div>';
+  } else {
+    html += '<ul class="lista">' + dati.schede.map(function (s) {
+      return '<li class="riga"><a class="riga-corpo" href="' + linkScheda(s) + '"><span><strong>' + esc(s.nome) + '</strong>' +
+        (s.id === dati.schedaAttivaId ? '<span class="etichetta-attiva">Attiva</span>' : '') + '</span>' +
+        '<small>' + plurale(s.giorni.length, 'giorno', 'giorni') + '</small></a></li>';
+    }).join('') + '</ul>';
+  }
+  html += '<button class="btn primario" data-az="scheda-nuova">Nuova scheda</button>';
+  elVista.innerHTML = html;
+}
+
+function htmlFrecce(azione, id, indice, totale, nome) {
+  return '<button class="icona" data-az="' + azione + '" data-id="' + id + '" data-dir="-1" aria-label="Sposta su ' + esc(nome) + '"' +
+      (indice === 0 ? ' disabled' : '') + '>↑</button>' +
+    '<button class="icona" data-az="' + azione + '" data-id="' + id + '" data-dir="1" aria-label="Sposta giù ' + esc(nome) + '"' +
+      (indice === totale - 1 ? ' disabled' : '') + '>↓</button>';
+}
+
+function vistaScheda() {
+  const s = rotta.scheda;
+  const attiva = s.id === dati.schedaAttivaId;
+  testata(s.nome, '#scheda');
+  let html = '<p class="tenue">' + (attiva ? 'Questa è la scheda attiva.' : 'Scheda archiviata (non attiva).') + '</p>';
+  html += '<h2>Giorni</h2>';
+  if (!s.giorni.length) html += '<p class="tenue">Nessun giorno. Aggiungi il primo, per esempio "Giorno A".</p>';
+  html += '<ul class="lista">' + s.giorni.map(function (g, i) {
+    return '<li class="riga"><a class="riga-corpo" href="' + linkGiorno(s, g) + '"><strong>' + esc(g.nome) + '</strong>' +
+      '<small>' + plurale(g.esercizi.length, 'esercizio', 'esercizi') + '</small></a>' +
+      htmlFrecce('giorno-sposta', g.id, i, s.giorni.length, g.nome) + '</li>';
+  }).join('') + '</ul>';
+  html += '<button class="btn primario" data-az="giorno-nuovo">Aggiungi giorno</button>';
+  html += '<h2>Scheda</h2>';
+  if (!attiva) html += '<button class="btn" data-az="scheda-attiva">Imposta come scheda attiva</button>';
+  html += '<button class="btn" data-az="scheda-rinomina">Rinomina scheda</button>' +
+    '<button class="btn pericolo" data-az="scheda-cancella">Cancella scheda</button>';
+  elVista.innerHTML = html;
+}
+
+function vistaGiorno() {
+  const s = rotta.scheda, g = rotta.giorno;
+  testata(g.nome, linkScheda(s));
+  let html = '<h2>Esercizi</h2>';
+  if (!g.esercizi.length) html += '<p class="tenue">Nessun esercizio in questo giorno.</p>';
+  html += '<ul class="lista">' + g.esercizi.map(function (v, i) {
+    const nome = nomeEsercizio(v.esercizioId);
+    return '<li class="riga"><a class="riga-corpo" href="' + linkVoce(s, g, v) + '"><strong>' + esc(nome) + '</strong>' +
+      '<small>' + esc(riassuntoSerie(v)) + (v.recupero ? ' · rec. ' + esc(v.recupero) : '') + '</small></a>' +
+      htmlFrecce('voce-sposta', v.id, i, g.esercizi.length, nome) + '</li>';
+  }).join('') + '</ul>';
+  html += '<a class="btn primario" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="' +
+    linkGiorno(s, g) + '/nuovo">Aggiungi esercizio</a>';
+  html += '<h2>Giorno</h2><button class="btn" data-az="giorno-rinomina">Rinomina giorno</button>' +
+    '<button class="btn pericolo" data-az="giorno-cancella">Cancella giorno</button>';
+  elVista.innerHTML = html;
+}
+
+function vistaNuovaVoce() {
+  const s = rotta.scheda, g = rotta.giorno;
+  testata('Nuovo esercizio', linkGiorno(s, g));
+  elVista.innerHTML = '<div class="carta">' +
+    '<label for="nv-nome">Nome dell\'esercizio</label>' +
+    '<input type="text" id="nv-nome" maxlength="80" autocomplete="off" placeholder="es. Panca piana">' +
+    '<div class="suggerimenti" id="nv-sugg"></div>' +
+    '<div class="in-linea"><div class="stretto"><label for="nv-serie">Serie</label>' +
+    '<input type="text" id="nv-serie" inputmode="decimal" autocomplete="off" value="3"></div>' +
+    '<div><label for="nv-rip">Ripetizioni per serie</label>' +
+    '<input type="text" id="nv-rip" maxlength="20" autocomplete="off" placeholder="es. 8-10 oppure max"></div></div>' +
+    '</div><button class="btn primario" data-az="voce-aggiungi">Aggiungi al giorno</button>' +
+    '<p class="tenue">Recupero, nota e serie diverse tra loro si impostano dopo, aprendo l\'esercizio.</p>';
+  document.getElementById('nv-nome').focus();
+}
+
+function vistaVoce() {
+  const s = rotta.scheda, g = rotta.giorno, v = rotta.voce;
+  testata(nomeEsercizio(v.esercizioId), linkGiorno(s, g));
+  const uguali = serieTutteUguali(v);
+  let html = '<h2>Inserimento rapido</h2><div class="carta">' +
+    '<div class="in-linea"><div class="stretto"><label for="rap-n">Serie</label>' +
+    '<input type="text" id="rap-n" inputmode="decimal" autocomplete="off" value="' + v.serie.length + '"></div>' +
+    '<div><label for="rap-rip">Ripetizioni per serie</label>' +
+    '<input type="text" id="rap-rip" maxlength="20" autocomplete="off" placeholder="es. 8-10" value="' +
+    esc(uguali && v.serie.length ? v.serie[0].ripetizioni : '') + '"></div></div>' +
+    '<button class="btn" style="margin-top:10px;margin-bottom:0" data-az="serie-genera">Genera serie uguali</button></div>';
+
+  html += '<h2>Serie</h2><div class="carta">' + v.serie.map(function (ser, i) {
+    return '<div class="serie-riga"><span>Serie ' + (i + 1) + '</span>' +
+      '<input type="text" maxlength="20" autocomplete="off" aria-label="Ripetizioni della serie ' + (i + 1) + '" ' +
+      'placeholder="ripetizioni" data-campo="rip" data-i="' + i + '" value="' + esc(ser.ripetizioni) + '">' +
+      '<button class="icona pericolo" data-az="serie-togli" data-i="' + i + '" aria-label="Togli la serie ' + (i + 1) + '">✕</button></div>';
+  }).join('') + '<button class="btn" style="margin-bottom:0" data-az="serie-aggiungi">Aggiungi una serie</button></div>';
+
+  html += '<h2>Dettagli</h2><div class="carta">' +
+    '<label for="v-rec" style="margin-top:0">Recupero (facoltativo)</label>' +
+    '<input type="text" id="v-rec" maxlength="30" autocomplete="off" placeholder="es. 90s" data-campo="recupero" value="' + esc(v.recupero) + '">' +
+    '<label for="v-nota">Nota (facoltativa)</label>' +
+    '<textarea id="v-nota" maxlength="300" data-campo="nota" placeholder="es. fermo al petto">' + esc(v.nota) + '</textarea></div>';
+
+  html += '<h2>Esercizio</h2><button class="btn" data-az="voce-cambia">Cambia esercizio</button>' +
+    '<button class="btn pericolo" data-az="voce-cancella">Togli dal giorno</button>';
+  elVista.innerHTML = html;
+}
+
+/* ---- Azioni dei pulsanti ---- */
+
+const MSG_SERIE = 'Numero di serie non valido: scrivi un numero intero tra 1 e ' + MAX_SERIE + '.';
+const MSG_RIP = 'Scrivi le ripetizioni, per esempio 8-10 oppure max.';
+
+const AZIONI = {
+  'riparti': async function () {
+    if (!await chiediConferma('Ripartire da zero?', 'L\'app ripartirà vuota. I dati illeggibili restano da parte nel telefono.', 'Riparti da zero')) return;
+    ripartiDaZero();
+    document.getElementById('barra').hidden = false;
+  },
+
+  'scheda-nuova': async function () {
+    const nome = await chiediNome('Nuova scheda', 'Nome della scheda', '', 'es. Scheda novembre');
+    if (nome) { const s = creaScheda(nome); vai(linkScheda(s)); }
+  },
+  'scheda-rinomina': async function () {
+    const nome = await chiediNome('Rinomina scheda', 'Nome della scheda', rotta.scheda.nome);
+    if (nome) rinominaScheda(rotta.scheda, nome);
+  },
+  'scheda-attiva': function () {
+    attivaScheda(rotta.scheda);
+    avviso('"' + rotta.scheda.nome + '" è ora la scheda attiva.');
+  },
+  'scheda-cancella': async function () {
+    const s = rotta.scheda;
+    const ok = await chiediConferma('Cancellare la scheda?',
+      '"' + s.nome + '" con ' + plurale(s.giorni.length, 'giorno', 'giorni') + ' verrà cancellata. Gli allenamenti già registrati restano nello storico.');
+    if (ok) { cancellaScheda(s); vai('#scheda'); }
+  },
+
+  'giorno-nuovo': async function () {
+    const nome = await chiediNome('Nuovo giorno', 'Nome del giorno', '', 'es. Giorno A - Petto e tricipiti');
+    if (nome) { const g = creaGiorno(rotta.scheda, nome); vai(linkGiorno(rotta.scheda, g)); }
+  },
+  'giorno-rinomina': async function () {
+    const nome = await chiediNome('Rinomina giorno', 'Nome del giorno', rotta.giorno.nome);
+    if (nome) rinominaGiorno(rotta.giorno, nome);
+  },
+  'giorno-cancella': async function () {
+    const g = rotta.giorno;
+    const ok = await chiediConferma('Cancellare il giorno?',
+      '"' + g.nome + '" con ' + plurale(g.esercizi.length, 'esercizio', 'esercizi') + ' verrà cancellato dalla scheda.');
+    if (ok) { cancellaGiorno(rotta.scheda, g); vai(linkScheda(rotta.scheda)); }
+  },
+  'giorno-sposta': function (b) { spostaGiorno(rotta.scheda, b.dataset.id, Number(b.dataset.dir)); },
+
+  'voce-aggiungi': function () {
+    const nome = pulisciTesto(document.getElementById('nv-nome').value);
+    const n = leggiIntero(document.getElementById('nv-serie').value, 1, MAX_SERIE);
+    const rip = pulisciTesto(document.getElementById('nv-rip').value);
+    if (!nome) { avviso('Scrivi il nome dell\'esercizio.', true); return false; }
+    if (n === null) { avviso(MSG_SERIE, true); return false; }
+    if (!rip) { avviso(MSG_RIP, true); return false; }
+    aggiungiVoce(rotta.giorno, nome, n, rip);
+    vai(linkGiorno(rotta.scheda, rotta.giorno));
+  },
+  'voce-cambia': async function () {
+    const nome = await chiediNome('Cambia esercizio', 'Nome dell\'esercizio', nomeEsercizio(rotta.voce.esercizioId), '', true);
+    if (nome) cambiaEsercizioVoce(rotta.voce, nome);
+  },
+  'voce-cancella': async function () {
+    const ok = await chiediConferma('Togliere l\'esercizio?',
+      '"' + nomeEsercizio(rotta.voce.esercizioId) + '" verrà tolto da questo giorno. Lo storico dell\'esercizio non cambia.', 'Togli');
+    if (ok) { cancellaVoce(rotta.giorno, rotta.voce); vai(linkGiorno(rotta.scheda, rotta.giorno)); }
+  },
+  'voce-sposta': function (b) { spostaVoce(rotta.giorno, b.dataset.id, Number(b.dataset.dir)); },
+
+  'serie-genera': async function () {
+    const v = rotta.voce;
+    const n = leggiIntero(document.getElementById('rap-n').value, 1, MAX_SERIE);
+    const rip = pulisciTesto(document.getElementById('rap-rip').value);
+    if (n === null) { avviso(MSG_SERIE, true); return false; }
+    if (!rip) { avviso(MSG_RIP, true); return false; }
+    // Chiedo conferma solo se si perde qualcosa: serie in meno o serie diverse tra loro.
+    if (n < v.serie.length || !serieTutteUguali(v)) {
+      const ok = await chiediConferma('Sostituire le serie?',
+        'Le ' + v.serie.length + ' serie attuali (' + riassuntoSerie(v) + ') diventeranno ' + n + ' × ' + rip + '.', 'Sostituisci');
+      if (!ok) return false;
+    }
+    generaSerie(v, n, rip);
+  },
+  'serie-aggiungi': function () {
+    if (rotta.voce.serie.length >= MAX_SERIE) { avviso('Massimo ' + MAX_SERIE + ' serie per esercizio.', true); return false; }
+    aggiungiSerie(rotta.voce);
+  },
+  'serie-togli': async function (b) {
+    const v = rotta.voce, i = Number(b.dataset.i);
+    if (v.serie.length <= 1) { avviso('Deve restare almeno una serie. Per eliminare l\'esercizio usa "Togli dal giorno".', true); return false; }
+    const ok = await chiediConferma('Togliere la serie ' + (i + 1) + '?', 'Ripetizioni: ' + (v.serie[i].ripetizioni || '(vuoto)') + '.', 'Togli');
+    if (!ok) return false;
+    togliSerie(v, i);
+  }
+};
+
+let azioneInCorso = false;
+document.addEventListener('click', async function (e) {
+  const b = e.target.closest('[data-az]');
+  if (!b || azioneInCorso || b.closest('.velo')) return;
+  const azione = AZIONI[b.dataset.az];
+  if (!azione) return;
+  azioneInCorso = true;
+  const hashPrima = location.hash;
+  try {
+    const esito = await azione(b);
+    // Ridisegno se l'azione è andata a buon fine e non ha già cambiato schermata.
+    if (esito !== false && location.hash === hashPrima) disegna();
+    if (dati) controllaSalvataggio();
+  } finally {
+    azioneInCorso = false;
+  }
+});
+
+// Campi di testo: salvo a ogni tasto, senza ridisegnare (così non perdo il cursore).
+document.addEventListener('input', function (e) {
+  const el = e.target;
+  if (el.id === 'nv-nome') { document.getElementById('nv-sugg').innerHTML = htmlSuggerimenti(el.value); return; }
+  if (!el.dataset || !el.dataset.campo || !rotta.voce) return;
+  if (el.dataset.campo === 'rip') modificaSerie(rotta.voce, Number(el.dataset.i), el.value);
+  else modificaCampoVoce(rotta.voce, el.dataset.campo, el.value);
+  controllaSalvataggio();
+});
+
+// Suggerimenti nella schermata "Nuovo esercizio".
+elVista.addEventListener('click', function (e) {
+  const b = e.target.closest('#nv-sugg [data-sugg]');
+  if (!b) return;
+  document.getElementById('nv-nome').value = b.dataset.sugg;
+  document.getElementById('nv-sugg').innerHTML = '';
+  document.getElementById('nv-serie').focus();
+});
+
+window.addEventListener('hashchange', function () { disegna(); window.scrollTo(0, 0); });
+
+// Se i dati cambiano in un'altra scheda del browser, li ricarico.
+window.addEventListener('storage', function (e) {
+  if (e.key === CHIAVE || e.key === null) { carica(); disegna(); }
+});
+
+carica();
+disegna();
+</script>
+</body>
+</html>
