@@ -7,6 +7,13 @@
 <meta name="theme-color" content="#f4f5f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)">
 <title>Palestra</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icone/icona-192.png">
+<link rel="apple-touch-icon" href="icone/icona-180.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Palestra">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
   :root {
     --sfondo: #f4f5f7; --carta: #ffffff; --testo: #111418; --tenue: #4d5560;
@@ -141,10 +148,14 @@
   }
   #avviso.errore { background: var(--pericolo); color: var(--su-pericolo); }
   #avviso[hidden] { display: none; }
+  #aggiorna { margin: 12px 12px 0; width: calc(100% - 24px); max-width: 616px; }
+  #aggiorna[hidden] { display: none; }
+  @media (min-width: 640px) { #aggiorna { display: block; margin-left: auto; margin-right: auto; } }
 </style>
 </head>
 <body>
 <header id="testata"></header>
+<button id="aggiorna" class="btn primario" hidden>Nuova versione disponibile, tocca per aggiornare</button>
 <main id="vista"></main>
 <nav id="barra" aria-label="Sezioni">
   <a href="#allenamento" data-tab="allenamento">Allenamento</a>
@@ -780,7 +791,9 @@ function vistaDati() {
   elVista.innerHTML = '<div class="carta"><p><strong>I dati sono salvati su questo dispositivo.</strong></p>' +
     '<p class="tenue">' + plurale(dati.schede.length, 'scheda', 'schede') + ', ' +
     plurale(dati.catalogo.length, 'esercizio', 'esercizi') + ' nel catalogo.</p></div>' +
-    '<p class="tenue">Esportazione e importazione del backup arrivano nella sotto-fase 1c.</p>';
+    '<p class="tenue">Esportazione e importazione del backup arrivano nella sotto-fase 1c.</p>' +
+    '<p class="tenue" id="versione-app"></p>';
+  mostraVersione();
 }
 
 function vistaSchede() {
@@ -1117,8 +1130,66 @@ window.addEventListener('storage', function (e) {
   if (e.key === CHIAVE || e.key === null) { carica(); disegna(); }
 });
 
+/* ---- App installabile: funzionamento offline e aggiornamenti ---- */
+
+// Scrive nella sezione Dati quale versione dell'app è sul telefono.
+function mostraVersione() {
+  if (!window.caches) return;
+  caches.keys().then(function (nomi) {
+    const el = document.getElementById('versione-app');
+    const versioni = nomi.filter(function (n) { return n.indexOf('palestra-v') === 0; })
+      .map(function (n) { return Number(n.slice(10)); }).sort(function (a, b) { return a - b; });
+    if (el && versioni.length) el.textContent = 'Versione dell\'app: ' + versioni[0] + '. Disponibile senza connessione.';
+  }).catch(function () {});
+}
+
+function avviaServiceWorker() {
+  if (!('serviceWorker' in navigator)) return;
+  const pulsante = document.getElementById('aggiorna');
+  let registrazione = null;
+  let ricaricata = false;
+
+  function proponi() { pulsante.hidden = false; }
+
+  navigator.serviceWorker.register('sw.js').then(function (reg) {
+    registrazione = reg;
+    // Una nuova versione è già pronta e aspetta.
+    if (reg.waiting && navigator.serviceWorker.controller) proponi();
+    reg.addEventListener('updatefound', function () {
+      const nuovo = reg.installing;
+      if (!nuovo) return;
+      nuovo.addEventListener('statechange', function () {
+        if (nuovo.state === 'installed' && navigator.serviceWorker.controller) proponi();
+      });
+    });
+  }).catch(function () { /* senza service worker l'app funziona lo stesso, ma solo online */ });
+
+  pulsante.addEventListener('click', function () {
+    if (registrazione && registrazione.waiting) registrazione.waiting.postMessage('aggiorna');
+    else location.reload();
+  });
+
+  // Quando la nuova versione prende il controllo, ricarico la pagina una volta sola.
+  // (Alla prima installazione non c'era nessuna versione prima: niente ricarica.)
+  let controllata = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', function () {
+    if (!controllata) { controllata = true; return; }
+    if (ricaricata) return;
+    ricaricata = true;
+    location.reload();
+  });
+
+  // Ogni volta che riapro l'app controllo se c'è una versione nuova.
+  document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && registrazione) registrazione.update().catch(function () {});
+  });
+}
+
 carica();
 disegna();
+avviaServiceWorker();
+// Chiedo al telefono di non cancellare i dati quando ha poco spazio.
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
 </script>
 </body>
 </html>

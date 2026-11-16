@@ -16,7 +16,7 @@ App personale (un solo utente) per registrare gli allenamenti. Dettagli completi
 ## Vincoli tecnici
 
 - HTML, CSS, JavaScript puri. Niente framework, librerie, CDN, npm, build.
-- Tutto in un unico `index.html` (CSS e JS inline). Dalla Fase 3 anche `manifest.webmanifest`, `sw.js`, icone.
+- Tutto in un unico `index.html` (CSS e JS inline), più `manifest.webmanifest`, `sw.js`, icone. A ogni modifica pubblicata aumenta di 1 `VERSIONE` in `sw.js`.
 - Dati in `localStorage`, una sola chiave, JSON con `schemaVersion` e funzione di migrazione.
 - Salvataggio automatico a ogni modifica. Nessun pulsante "Salva". Mai perdere dati.
 - Logica dei dati separata dal codice dell'interfaccia.
