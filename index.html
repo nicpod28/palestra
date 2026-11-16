@@ -116,7 +116,7 @@
   }
   nav a {
     flex: 1; min-height: 60px; display: flex; align-items: center; justify-content: center;
-    text-decoration: none; color: var(--tenue); font-weight: 600; font-size: 15px;
+    text-decoration: none; color: var(--tenue); font-weight: 600; font-size: 14px;
     border-top: 3px solid transparent;
   }
   nav a[aria-current=page] { color: var(--accento); border-top-color: var(--accento); }
@@ -151,6 +151,22 @@
   .commento-serie { margin: 0 0 10px; }
   .commento-serie[hidden] { display: none; }
   input[aria-invalid=true] { border: 2px solid var(--pericolo) !important; }
+  /* Storico */
+  .scelta { display: flex; gap: 8px; margin-bottom: 12px; }
+  .scelta a { flex: 1; min-height: 48px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--bordo);
+    border-radius: 12px; background: var(--carta); color: var(--testo); text-decoration: none; font-weight: 600; }
+  .scelta a[aria-current=page] { background: var(--accento); color: var(--su-accento); border-color: var(--accento); }
+  .numeri { display: flex; gap: 8px; margin-bottom: 12px; }
+  .numeri > div { flex: 1; background: var(--carta); border: 1px solid var(--bordo); border-radius: 14px; padding: 10px 12px; }
+  .numeri small { display: block; color: var(--tenue); font-size: 13px; }
+  .numeri strong { font-size: 22px; }
+  .voce-storico .capo { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .voce-storico .capo small { color: var(--tenue); font-size: 14px; }
+  .su { color: var(--fatto); font-weight: 700; } .giu { color: var(--pericolo); font-weight: 700; }
+  ol.serie-storico { margin: 6px 0 0; padding-left: 26px; }
+  ol.serie-storico li { margin-bottom: 4px; overflow-wrap: anywhere; }
+  ol.serie-storico li.non-fatta { color: var(--tenue); }
+  ol.serie-storico small { display: block; color: var(--tenue); font-size: 14px; }
   .btn-link { display: flex; align-items: center; justify-content: center; text-decoration: none; }
   .giorno-avvia { text-align: left; min-height: 64px; }
   .giorno-avvia small { display: block; font-weight: 400; color: var(--tenue); font-size: 14px; }
@@ -186,6 +202,7 @@
 <nav id="barra" aria-label="Sezioni">
   <a href="#allenamento" data-tab="allenamento">Allenamento</a>
   <a href="#scheda" data-tab="scheda">Scheda</a>
+  <a href="#storico" data-tab="storico">Storico</a>
   <a href="#dati" data-tab="dati">Dati</a>
 </nav>
 <div id="avviso" role="status" aria-live="polite" hidden></div>
@@ -598,6 +615,87 @@ function annullaAllenamento(a) {
 }
 
 function durataMinuti(a) { return Math.max(0, Math.round((Date.parse(a.fine || new Date().toISOString()) - Date.parse(a.inizio)) / 60000)); }
+
+/* ---- Storico ---- */
+
+function allenamentiCompletati() {
+  return dati.allenamenti.filter(function (a) { return a.stato === 'completato'; })
+    .sort(function (a, b) { return Date.parse(b.inizio) - Date.parse(a.inizio); });
+}
+
+function allenamentoCompletatoPerId(id) {
+  return dati.allenamenti.find(function (a) { return a.id === id && a.stato === 'completato'; }) || null;
+}
+
+function cancellaAllenamento(a) {
+  dati.allenamenti = dati.allenamenti.filter(function (x) { return x.id !== a.id; });
+  pulisciCatalogo();
+  salva();
+}
+
+function formattaDurata(minuti) {
+  return minuti < 60 ? minuti + ' min' : Math.floor(minuti / 60) + ' h ' + dueCifre(minuti % 60) + ' min';
+}
+
+// "67,5 kg × 9" oppure "12 rip." per il corpo libero.
+function testoSerie(x) {
+  const rip = x.ripetizioni === null ? '?' : x.ripetizioni;
+  return x.carico === null ? rip + ' rip.' : formattaNumero(x.carico) + ' kg × ' + rip;
+}
+
+// Storico di un esercizio: una voce per allenamento completato, dal più recente,
+// con le sole serie fatte e il carico più alto di quel giorno (null se a corpo libero).
+function storicoEsercizio(esercizioId) {
+  const voci = [];
+  allenamentiCompletati().forEach(function (a) {
+    let serie = [];
+    a.esercizi.forEach(function (v) {
+      if (v.esercizioId === esercizioId) serie = serie.concat(v.serie.filter(function (x) { return x.fatta; }));
+    });
+    if (!serie.length) return;
+    let massimo = null;
+    serie.forEach(function (x) { if (x.carico !== null && (massimo === null || x.carico > massimo)) massimo = x.carico; });
+    voci.push({ allenamento: a, serie: serie, massimo: massimo });
+  });
+  return voci;
+}
+
+// Carico massimo di sempre (con la data in cui è stato raggiunto la prima volta) e ultimo carico usato.
+function numeriEsercizio(storico) {
+  let massimo = null, ultimo = null;
+  for (let i = storico.length - 1; i >= 0; i--) {
+    const v = storico[i];
+    if (v.massimo === null) continue;
+    if (!massimo || v.massimo > massimo.carico) massimo = { carico: v.massimo, data: v.allenamento.inizio };
+    ultimo = { carico: v.massimo, data: v.allenamento.inizio };
+  }
+  return { massimo: massimo, ultimo: ultimo };
+}
+
+// Cambia il nome nel catalogo: lo storico resta unito perché è agganciato all'id.
+// Restituisce false se un altro esercizio ha già quel nome.
+function rinominaEsercizio(esercizio, nome) {
+  const altro = esercizioPerNome(nome);
+  if (altro && altro.id !== esercizio.id) return false;
+  esercizio.nome = pulisciTesto(nome);
+  salva();
+  return true;
+}
+
+// Unisce due esercizi: schede e allenamenti di "assorbito" passano a "tenuto".
+function unisciEsercizi(tenutoId, assorbitoId) {
+  if (tenutoId === assorbitoId || !esercizioPerId(tenutoId) || !esercizioPerId(assorbitoId)) return false;
+  dati.schede.forEach(function (s) {
+    s.giorni.forEach(function (g) {
+      g.esercizi.forEach(function (v) { if (v.esercizioId === assorbitoId) v.esercizioId = tenutoId; });
+    });
+  });
+  dati.allenamenti.forEach(function (a) {
+    a.esercizi.forEach(function (v) { if (v.esercizioId === assorbitoId) v.esercizioId = tenutoId; });
+  });
+  dati.catalogo = dati.catalogo.filter(function (e) { return e.id !== assorbitoId; });
+  return salva();
+}
 
 /* ---- Date ---- */
 
@@ -1048,8 +1146,15 @@ function htmlSuggerimenti(testo) {
 
 function leggiRotta() {
   const p = location.hash.replace(/^#/, '').split('/').map(decodeURIComponent);
-  const r = { tab: ['allenamento', 'scheda', 'dati'].indexOf(p[0]) !== -1 ? p[0] : 'allenamento' };
+  const r = { tab: ['allenamento', 'scheda', 'storico', 'dati'].indexOf(p[0]) !== -1 ? p[0] : 'allenamento' };
   r.corso = r.tab === 'allenamento' && p[1] === 'corso' && dati ? allenamentoInCorso() : null;
+  if (r.tab === 'storico' && dati) {
+    r.elenco = p[1] === 'allenamenti' ? 'allenamenti' : 'esercizi';
+    r.passato = p[1] === 'a' && p[2] ? allenamentoCompletatoPerId(p[2]) : null;
+    r.modifica = r.passato && p[3] === 'modifica' ? r.passato : null;
+    r.esercizio = p[1] === 'e' && p[2] ? esercizioPerId(p[2]) : null;
+    r.unisci = !!(r.esercizio && p[3] === 'unisci');
+  }
   if (r.tab === 'scheda' && dati) {
     r.importa = p[1] === 'importa';
     r.scheda = p[1] && !r.importa ? schedaPerId(p[1]) : null;
@@ -1082,6 +1187,13 @@ function disegna() {
     if (a.dataset.tab === rotta.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   if (rotta.tab === 'dati') return vistaDati();
+  if (rotta.tab === 'storico') {
+    if (rotta.modifica) return vistaModificaPassato();
+    if (rotta.passato) return vistaPassato();
+    if (rotta.unisci) return vistaUnisci();
+    if (rotta.esercizio) return vistaStoricoEsercizio();
+    return vistaStorico();
+  }
   if (rotta.corso) return vistaCorso();
   if (rotta.tab === 'allenamento') return vistaAllenamento();
   if (rotta.voce) return vistaVoce();
@@ -1165,37 +1277,143 @@ function htmlRigaSerie(x, e, n) {
     '<input type="text" maxlength="200" autocomplete="off" placeholder="Commento alla serie ' + (n + 1) + '" aria-label="Commento alla serie ' + (n + 1) + '" data-all="commento"' + dove + ' value="' + esc(x.commento) + '"></div>';
 }
 
-function vistaCorso() {
-  const a = rotta.corso;
-  testata(a.giornoNome, '#allenamento');
-  let html = '<p class="tenue" id="all-progresso">' + esc(testoProgresso(a)) + '</p>';
-  html += a.esercizi.map(function (v, e) {
-    const ultima = ultimaVolta(v.esercizioId, occorrenzaVoce(a.esercizi, e));
+// Esercizi e serie modificabili: usati sia per l'allenamento in corso sia per correggerne uno passato.
+function htmlEserciziAllenamento(a, conUltima) {
+  return a.esercizi.map(function (v, e) {
+    const ultima = conUltima ? ultimaVolta(v.esercizioId, occorrenzaVoce(a.esercizi, e)) : null;
     return '<div class="carta es-all"><h3>' + esc(nomeVoceAllenamento(v)) + '</h3>' +
       (v.recupero ? '<p class="info">Recupero: ' + esc(v.recupero) + '</p>' : '') +
       (v.nota ? '<p class="info">Nota: ' + esc(v.nota) + '</p>' : '') +
-      '<p class="ultima">' + (ultima ? '<strong>Ultima volta (' + formattaData(ultima.inizio) + '):</strong> ' + esc(riassuntoFatte(ultima.serie))
-        : '<strong>Ultima volta:</strong> mai fatto') + '</p>' +
+      (conUltima ? '<p class="ultima">' + (ultima ? '<strong>Ultima volta (' + formattaData(ultima.inizio) + '):</strong> ' + esc(riassuntoFatte(ultima.serie))
+        : '<strong>Ultima volta:</strong> mai fatto') + '</p>' : '') +
       '<div class="intest-serie"><span>serie</span><span>kg</span><span>ripetizioni</span><span>fatta</span><span>nota</span></div>' +
       v.serie.map(function (x, n) { return htmlRigaSerie(x, e, n); }).join('') +
       '<button class="btn" style="margin:4px 0 0" data-az="all-serie-piu" data-e="' + e + '">Aggiungi una serie</button></div>';
-  }).join('');
-  html += '<div class="carta"><label for="all-nota" style="margin-top:0">Nota sull\'allenamento (facoltativa)</label>' +
-    '<textarea id="all-nota" maxlength="500" data-all="nota" placeholder="es. poca energia, spalla indolenzita">' + esc(a.nota) + '</textarea></div>' +
+  }).join('') +
+    '<div class="carta"><label for="all-nota" style="margin-top:0">Nota sull\'allenamento (facoltativa)</label>' +
+    '<textarea id="all-nota" maxlength="500" data-all="nota" placeholder="es. poca energia, spalla indolenzita">' + esc(a.nota) + '</textarea></div>';
+}
+
+function vistaCorso() {
+  const a = rotta.corso;
+  testata(a.giornoNome, '#allenamento');
+  elVista.innerHTML = '<p class="tenue" id="all-progresso">' + esc(testoProgresso(a)) + '</p>' + htmlEserciziAllenamento(a, true) +
     '<button class="btn primario" data-az="all-termina">Termina allenamento</button>' +
     '<button class="btn pericolo" data-az="all-annulla">Annulla allenamento</button>';
+}
+
+// L'allenamento mostrato nella schermata attuale con i campi modificabili.
+function allenamentoAperto() { return rotta.modifica || rotta.corso || null; }
+
+/* ---- Storico: schermate ---- */
+
+function htmlScelta() {
+  return '<div class="scelta"><a href="#storico"' + (rotta.elenco === 'esercizi' ? ' aria-current="page"' : '') + '>Esercizi</a>' +
+    '<a href="#storico/allenamenti"' + (rotta.elenco === 'allenamenti' ? ' aria-current="page"' : '') + '>Allenamenti</a></div>';
+}
+
+function vistaStorico() {
+  testata('Storico');
+  let html = htmlScelta();
+  if (rotta.elenco === 'allenamenti') {
+    const lista = allenamentiCompletati();
+    if (!lista.length) html += '<div class="carta"><strong>Nessun allenamento completato.</strong><br><span class="tenue">Compariranno qui dopo "Termina allenamento".</span></div>';
+    html += '<ul class="lista">' + lista.map(function (a) {
+      return '<li class="riga"><a class="riga-corpo" href="#storico/a/' + a.id + '"><strong>' + formattaData(a.inizio) + ' · ' + esc(a.giornoNome) + '</strong>' +
+        '<small>' + formattaDurata(durataMinuti(a)) + ' · ' + plurale(contaSerie(a).fatte, 'serie fatta', 'serie fatte') + '</small></a></li>';
+    }).join('') + '</ul>';
+  } else {
+    const esercizi = dati.catalogo.slice().sort(function (a, b) { return a.nome.localeCompare(b.nome, 'it'); });
+    if (!esercizi.length) html += '<div class="carta"><strong>Catalogo vuoto.</strong><br><span class="tenue">Gli esercizi compaiono qui quando li aggiungi a una scheda.</span></div>';
+    html += '<ul class="lista">' + esercizi.map(function (e) {
+      const st = storicoEsercizio(e.id);
+      return '<li class="riga"><a class="riga-corpo" href="#storico/e/' + e.id + '"><strong>' + esc(e.nome) + '</strong>' +
+        '<small>' + (st.length ? plurale(st.length, 'allenamento', 'allenamenti') + ' · ultimo il ' + formattaData(st[0].allenamento.inizio) : 'mai fatto') + '</small></a></li>';
+    }).join('') + '</ul>';
+  }
   elVista.innerHTML = html;
+}
+
+function vistaPassato() {
+  const a = rotta.passato, c = contaSerie(a);
+  testata(formattaData(a.inizio), '#storico/allenamenti');
+  let html = '<div class="carta"><strong>' + esc(a.giornoNome) + '</strong><br><span class="tenue">' + esc(a.schedaNome) + '<br>' +
+    'Dalle ' + oraBreve(a.inizio) + ' alle ' + oraBreve(a.fine) + ' · ' + formattaDurata(durataMinuti(a)) + ' · ' + c.fatte + ' di ' + c.totali + ' serie fatte</span>' +
+    (a.nota ? '<p style="margin:8px 0 0"><strong>Nota:</strong> ' + esc(a.nota) + '</p>' : '') + '</div>';
+  html += a.esercizi.map(function (v) {
+    return '<div class="carta"><a href="#storico/e/' + v.esercizioId + '" style="color:inherit"><strong>' + esc(nomeVoceAllenamento(v)) + '</strong></a>' +
+      '<ol class="serie-storico">' + v.serie.map(function (x) {
+        return '<li' + (x.fatta ? '' : ' class="non-fatta"') + '>' + (x.fatta ? esc(testoSerie(x)) : 'non fatta') +
+          (x.commento ? '<small>' + esc(x.commento) + '</small>' : '') + '</li>';
+      }).join('') + '</ol></div>';
+  }).join('');
+  html += '<a class="btn btn-link" href="#storico/a/' + a.id + '/modifica">Correggi allenamento</a>' +
+    '<button class="btn pericolo" data-az="passato-cancella">Cancella allenamento</button>';
+  elVista.innerHTML = html;
+}
+
+function vistaModificaPassato() {
+  const a = rotta.modifica;
+  testata('Correggi ' + formattaData(a.inizio), '#storico/a/' + a.id);
+  elVista.innerHTML = '<p class="tenue">' + esc(a.giornoNome) + '. Ogni correzione viene salvata subito.</p>' +
+    '<p class="tenue" id="all-progresso">' + esc(testoProgresso(a)) + '</p>' + htmlEserciziAllenamento(a, false) +
+    '<a class="btn primario btn-link" href="#storico/a/' + a.id + '">Torna al dettaglio</a>';
+}
+
+function vistaStoricoEsercizio() {
+  const es = rotta.esercizio, storico = storicoEsercizio(es.id), n = numeriEsercizio(storico);
+  testata(es.nome, '#storico');
+  let html = '';
+  if (!storico.length) {
+    html += '<div class="carta"><strong>Nessuna serie registrata.</strong><br><span class="tenue">Lo storico compare dopo il primo allenamento completato con questo esercizio.</span></div>';
+  } else {
+    html += '<div class="numeri"><div><small>Carico massimo</small><strong>' + (n.massimo ? formattaNumero(n.massimo.carico) + ' kg' : '—') + '</strong>' +
+      '<small>' + (n.massimo ? 'il ' + formattaData(n.massimo.data) : 'corpo libero') + '</small></div>' +
+      '<div><small>Ultimo carico</small><strong>' + (n.ultimo ? formattaNumero(n.ultimo.carico) + ' kg' : '—') + '</strong>' +
+      '<small>' + (n.ultimo ? 'il ' + formattaData(n.ultimo.data) : 'corpo libero') + '</small></div></div>';
+    html += storico.map(function (v, i) {
+      // Confronto con la volta precedente, per vedere subito se il carico è salito.
+      const prima = storico[i + 1];
+      let diff = '';
+      if (v.massimo !== null && prima && prima.massimo !== null) {
+        const d = Math.round((v.massimo - prima.massimo) * 100) / 100;
+        diff = d > 0 ? ' <span class="su">▲ +' + formattaNumero(d) + '</span>' : d < 0 ? ' <span class="giu">▼ ' + formattaNumero(d).replace('-', '−') + '</span>' : ' <span class="tenue">=</span>';
+      }
+      return '<div class="carta voce-storico"><div class="capo"><a href="#storico/a/' + v.allenamento.id + '" style="color:inherit"><strong>' + formattaData(v.allenamento.inizio) + '</strong></a>' +
+        '<span>' + (v.massimo !== null ? formattaNumero(v.massimo) + ' kg' + diff : '') + '</span></div>' +
+        '<div class="capo"><small>' + esc(v.allenamento.giornoNome) + '</small></div>' +
+        '<ol class="serie-storico">' + v.serie.map(function (x) {
+          return '<li>' + esc(testoSerie(x)) + (x.commento ? '<small>' + esc(x.commento) + '</small>' : '') + '</li>';
+        }).join('') + '</ol></div>';
+    }).join('');
+  }
+  html += '<h2>Catalogo</h2><button class="btn" data-az="es-rinomina">Rinomina esercizio</button>';
+  if (dati.catalogo.length > 1) html += '<a class="btn btn-link" href="#storico/e/' + es.id + '/unisci">Unisci con un esercizio doppio</a>';
+  elVista.innerHTML = html;
+}
+
+function vistaUnisci() {
+  const es = rotta.esercizio;
+  testata('Unisci esercizi', '#storico/e/' + es.id);
+  const altri = dati.catalogo.filter(function (e) { return e.id !== es.id; }).sort(function (a, b) { return a.nome.localeCompare(b.nome, 'it'); });
+  elVista.innerHTML = '<p>Scegli il doppione da unire a <strong>' + esc(es.nome) + '</strong>. Il suo storico e le sue presenze nelle schede passano a "' +
+    esc(es.nome) + '", e il doppione sparisce dal catalogo.</p>' +
+    altri.map(function (e) {
+      const st = storicoEsercizio(e.id);
+      return '<button class="btn giorno-avvia" data-az="es-unisci" data-id="' + e.id + '"><strong>' + esc(e.nome) + '</strong><small>' +
+        (st.length ? plurale(st.length, 'allenamento', 'allenamenti') : 'mai fatto') + '</small></button>';
+    }).join('');
 }
 
 // La serie dell'allenamento in corso a cui si riferisce un pulsante o un campo.
 function serieDa(el) {
-  const a = allenamentoInCorso();
+  const a = allenamentoAperto();
   const voce = a && a.esercizi[Number(el.dataset.e)];
   return voce ? voce.serie[Number(el.dataset.s)] || null : null;
 }
 
 function aggiornaProgresso() {
-  const el = document.getElementById('all-progresso'), a = allenamentoInCorso();
+  const el = document.getElementById('all-progresso'), a = allenamentoAperto();
   if (el && a) el.textContent = testoProgresso(a);
 }
 
@@ -1552,7 +1770,7 @@ const AZIONI = {
     return false;
   },
   'all-serie-piu': function (b) {
-    const a = allenamentoInCorso(), voce = a && a.esercizi[Number(b.dataset.e)];
+    const a = allenamentoAperto(), voce = a && a.esercizi[Number(b.dataset.e)];
     if (!voce) return false;
     if (voce.serie.length >= MAX_SERIE) { avviso('Massimo ' + MAX_SERIE + ' serie per esercizio.', true); return false; }
     aggiungiSerieAllenamento(voce);
@@ -1582,6 +1800,38 @@ const AZIONI = {
     if (!ok) return false;
     annullaAllenamento(a);
     vai('#allenamento');
+  },
+
+  'passato-cancella': async function () {
+    const a = rotta.passato;
+    const ok = await chiediConferma('Cancellare l\'allenamento?',
+      'L\'allenamento del ' + formattaData(a.inizio) + ' (' + a.giornoNome + ', ' + plurale(contaSerie(a).fatte, 'serie fatta', 'serie fatte') + ') sparirà dallo storico.');
+    if (!ok) return false;
+    cancellaAllenamento(a);
+    vai('#storico/allenamenti');
+  },
+  'es-rinomina': async function () {
+    const es = rotta.esercizio;
+    const nome = await chiediNome('Rinomina esercizio', 'Nome dell\'esercizio', es.nome);
+    if (!nome) return false;
+    if (!rinominaEsercizio(es, nome)) {
+      avviso('Esiste già un esercizio chiamato "' + esercizioPerNome(nome).nome + '". Se sono lo stesso esercizio usa "Unisci".', true);
+      return false;
+    }
+  },
+  'es-unisci': async function (b) {
+    const tenuto = rotta.esercizio, assorbito = esercizioPerId(b.dataset.id);
+    if (!assorbito) return false;
+    const ok = await apriFinestra({
+      titolo: 'Unire i due esercizi?',
+      testo: '"' + assorbito.nome + '" verrà unito a "' + tenuto.nome + '": gli storici si sommano e resta solo "' + tenuto.nome +
+        '". Non si può annullare (se non reimportando un backup).',
+      ok: 'Unisci', pericolo: true
+    });
+    if (!ok) return false;
+    unisciEsercizi(tenuto.id, assorbito.id);
+    avviso('Esercizi uniti in "' + tenuto.nome + '".');
+    vai('#storico/e/' + tenuto.id);
   },
 
   'giorno-nuovo': async function () {
@@ -1671,8 +1921,8 @@ document.addEventListener('input', function (e) {
   const el = e.target;
   if (el.id === 'nv-nome') { document.getElementById('nv-sugg').innerHTML = htmlSuggerimenti(el.value); return; }
   if (el.dataset && el.dataset.all) {
-    // Allenamento in corso: salvo a ogni tasto i valori validi.
-    const a = allenamentoInCorso();
+    // Allenamento in corso o in correzione: salvo a ogni tasto i valori validi.
+    const a = allenamentoAperto();
     if (!a) return;
     if (el.dataset.all === 'nota') { impostaNotaAllenamento(a, el.value); controllaSalvataggio(); return; }
     const serie = serieDa(el);

@@ -1,6 +1,6 @@
 // Service worker: tiene una copia dell'app sul telefono, così funziona senza connessione.
 // A OGNI MODIFICA PUBBLICATA aumenta questo numero di 1: è ciò che fa arrivare l'aggiornamento al telefono.
-const VERSIONE = 3;
+const VERSIONE = 4;
 
 const CACHE = 'palestra-v' + VERSIONE;
 const FILE = [
