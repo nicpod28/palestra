@@ -124,6 +124,16 @@
   }
   .finestra h3 { margin: 0 0 8px; font-size: 19px; }
   .finestra .btn { margin-top: 8px; margin-bottom: 0; }
+  .btn-file { display: flex; align-items: center; justify-content: center; font-size: inherit; color: var(--testo); margin: 8px 0; }
+  .errori { border-color: var(--pericolo); }
+  .errori strong { color: var(--pericolo); }
+  .errori ul { margin: 8px 0 0; padding-left: 20px; }
+  .errori li { margin-bottom: 6px; overflow-wrap: anywhere; }
+  .anteprima h3 { margin: 14px 0 4px; font-size: 17px; }
+  .anteprima ul { margin: 0; padding-left: 20px; }
+  .anteprima li { margin-bottom: 6px; overflow-wrap: anywhere; }
+  .anteprima small { color: var(--tenue); display: block; }
+  .nuovo { font-size: 12px; font-weight: 700; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--accento); color: var(--accento); margin-left: 4px; white-space: nowrap; }
   #avviso {
     position: fixed; left: 12px; right: 12px; bottom: calc(76px + env(safe-area-inset-bottom)); z-index: 30;
     background: var(--testo); color: var(--sfondo); padding: 12px 14px; border-radius: 12px;
@@ -222,8 +232,10 @@ function ripartiDaZero() {
   return salva();
 }
 
+let contatoreId = 0;
 function nuovoId(prefisso) {
-  return prefisso + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  contatoreId = (contatoreId + 1) % 1296;
+  return prefisso + '_' + Date.now().toString(36) + contatoreId.toString(36) + Math.random().toString(36).slice(2, 5);
 }
 
 // Toglie spazi all'inizio, alla fine e doppi.
@@ -434,6 +446,148 @@ function riassuntoSerie(voce) {
   return voce.serie.map(function (s) { return s.ripetizioni || '?'; }).join(' / ');
 }
 
+/* ---- Importazione di una scheda da JSON (formato in FORMATO-SCHEDA.md) ---- */
+
+const LIMITI = { nome: 80, ripetizioni: 20, recupero: 30, nota: 300 };
+
+// Mostra un valore sbagliato dentro un messaggio d'errore, accorciato.
+function mostraValore(v) {
+  let t;
+  try { t = JSON.stringify(v); } catch (e) { t = String(v); }
+  if (t === undefined) t = 'niente';
+  return t.length > 40 ? t.slice(0, 40) + '…' : t;
+}
+
+// Testo o numero diventano testo pulito; qualsiasi altra cosa diventa null.
+function comeTesto(v) {
+  if (typeof v === 'string') return pulisciTesto(v);
+  if (typeof v === 'number' && isFinite(v)) return String(v);
+  return null;
+}
+
+function eOggetto(v) { return !!v && typeof v === 'object' && !Array.isArray(v); }
+
+// Controlla un oggetto nel formato d'importazione.
+// Restituisce { errori: [testi], scheda: versione ripulita oppure null }.
+function validaSchedaImportata(o) {
+  const errori = [];
+  if (!eOggetto(o)) {
+    return { errori: ['Il JSON deve essere un oggetto { ... } con i campi "nome" e "giorni" (trovato: ' + mostraValore(o) + ').'], scheda: null };
+  }
+
+  // Legge un campo di testo obbligatorio o facoltativo e segnala i problemi.
+  function campoTesto(valore, campo, dove, limite, obbligatorio) {
+    if (valore === undefined || valore === null) {
+      if (obbligatorio) errori.push(dove + ': manca il campo "' + campo + '".');
+      return '';
+    }
+    const t = comeTesto(valore);
+    if (t === null) { errori.push(dove + ': il campo "' + campo + '" deve essere un testo (trovato: ' + mostraValore(valore) + ').'); return ''; }
+    if (!t && obbligatorio) { errori.push(dove + ': il campo "' + campo + '" è vuoto.'); return ''; }
+    if (t.length > limite) { errori.push(dove + ': il campo "' + campo + '" è troppo lungo (massimo ' + limite + ' caratteri).'); return ''; }
+    return t;
+  }
+
+  const scheda = { nome: campoTesto(o.nome, 'nome', 'Scheda', LIMITI.nome, true), giorni: [] };
+
+  if (o.giorni === undefined || o.giorni === null) errori.push('Scheda: manca il campo "giorni".');
+  else if (!Array.isArray(o.giorni)) errori.push('Scheda: il campo "giorni" deve essere una lista [ ... ] (trovato: ' + mostraValore(o.giorni) + ').');
+  else if (!o.giorni.length) errori.push('Scheda: la lista "giorni" è vuota, serve almeno un giorno.');
+  else o.giorni.forEach(function (g, i) {
+    let dove = 'Giorno ' + (i + 1);
+    if (!eOggetto(g)) { errori.push(dove + ': deve essere un oggetto { ... } (trovato: ' + mostraValore(g) + ').'); return; }
+    const giorno = { nome: campoTesto(g.nome, 'nome', dove, LIMITI.nome, true), esercizi: [] };
+    if (giorno.nome) dove += ' ("' + giorno.nome + '")';
+    scheda.giorni.push(giorno);
+
+    if (g.esercizi === undefined || g.esercizi === null) { errori.push(dove + ': manca il campo "esercizi".'); return; }
+    if (!Array.isArray(g.esercizi)) { errori.push(dove + ': il campo "esercizi" deve essere una lista [ ... ] (trovato: ' + mostraValore(g.esercizi) + ').'); return; }
+
+    g.esercizi.forEach(function (e, j) {
+      let qui = dove + ', esercizio ' + (j + 1);
+      if (!eOggetto(e)) { errori.push(qui + ': deve essere un oggetto { ... } (trovato: ' + mostraValore(e) + ').'); return; }
+      const es = { nome: campoTesto(e.nome, 'nome', qui, LIMITI.nome, true), serie: [], recupero: '', nota: '' };
+      if (es.nome) qui += ' ("' + es.nome + '")';
+      es.recupero = campoTesto(e.recupero, 'recupero', qui, LIMITI.recupero, false);
+      es.nota = campoTesto(e.nota, 'nota', qui, LIMITI.nota, false);
+
+      const haSerie = e.serie !== undefined && e.serie !== null;
+      const numero = haSerie && (typeof e.serie === 'number' || typeof e.serie === 'string') ? leggiIntero(String(e.serie), 1, MAX_SERIE) : null;
+      if (haSerie && numero === null) {
+        errori.push(qui + ': il campo "serie" deve essere un numero intero tra 1 e ' + MAX_SERIE + ' (trovato: ' + mostraValore(e.serie) + ').');
+      }
+
+      if (e.ripetizioni === undefined || e.ripetizioni === null) {
+        errori.push(qui + ': manca il campo "ripetizioni".');
+      } else if (Array.isArray(e.ripetizioni)) {
+        // Lista: una voce per serie.
+        if (!e.ripetizioni.length || e.ripetizioni.length > MAX_SERIE) {
+          errori.push(qui + ': la lista "ripetizioni" deve avere da 1 a ' + MAX_SERIE + ' voci (ne ha ' + e.ripetizioni.length + ').');
+        } else {
+          e.ripetizioni.forEach(function (r, k) {
+            es.serie.push(campoTesto(r, 'ripetizioni', qui + ', serie ' + (k + 1), LIMITI.ripetizioni, true));
+          });
+          if (numero !== null && numero !== e.ripetizioni.length) {
+            errori.push(qui + ': "serie" vale ' + numero + ' ma la lista "ripetizioni" ha ' + e.ripetizioni.length +
+              ' voci. Togli "serie" oppure fai coincidere i due numeri.');
+          }
+        }
+      } else {
+        // Testo unico: uguale per tutte le serie, serve il numero di serie.
+        const rip = campoTesto(e.ripetizioni, 'ripetizioni', qui, LIMITI.ripetizioni, true);
+        if (!haSerie) errori.push(qui + ': manca il campo "serie" (il numero di serie). Serve quando "ripetizioni" è un testo unico.');
+        else if (numero !== null) for (let k = 0; k < numero; k++) es.serie.push(rip);
+      }
+      giorno.esercizi.push(es);
+    });
+  });
+
+  return { errori: errori, scheda: errori.length ? null : scheda };
+}
+
+// Dal testo incollato o dal file alla scheda controllata.
+function analizzaTestoScheda(testo) {
+  let t = String(testo == null ? '' : testo).replace(/^﻿/, '').trim();
+  // Tolgo l'eventuale cornice ```json ... ``` copiata da una chat.
+  const cornice = t.match(/^```[a-zA-Z]*\s*([\s\S]*?)\s*```$/);
+  if (cornice) t = cornice[1].trim();
+  if (!t) return { errori: ['Non c\'è niente da controllare: incolla il testo della scheda o scegli un file.'], scheda: null };
+  let oggetto;
+  try {
+    oggetto = JSON.parse(t);
+  } catch (e) {
+    const errori = ['Il testo non è un JSON valido. Controlla che non manchino virgole, virgolette o parentesi. (Dettaglio tecnico: ' + e.message + ')'];
+    if (/[“”„«»]/.test(t)) {
+      errori.push('Il testo contiene virgolette "curve" (“ ”): nel JSON servono le virgolette dritte ("). Capita quando il testo passa da un programma di scrittura.');
+    }
+    return { errori: errori, scheda: null };
+  }
+  return validaSchedaImportata(oggetto);
+}
+
+// Salva una scheda già controllata, collegando gli esercizi al catalogo per nome.
+function importaSchedaValidata(s) {
+  const scheda = {
+    id: nuovoId('sch'), nome: s.nome, creataIl: new Date().toISOString(),
+    giorni: s.giorni.map(function (g) {
+      return {
+        id: nuovoId('gio'), nome: g.nome,
+        esercizi: g.esercizi.map(function (e) {
+          return {
+            id: nuovoId('ve'), esercizioId: ottieniOCreaEsercizio(e.nome).id,
+            recupero: e.recupero, nota: e.nota,
+            serie: e.serie.map(function (r) { return { ripetizioni: r }; })
+          };
+        })
+      };
+    })
+  };
+  dati.schede.push(scheda);
+  if (!schedaPerId(dati.schedaAttivaId)) dati.schedaAttivaId = scheda.id;
+  salva();
+  return scheda;
+}
+
 function plurale(n, singolare, pluraleTesto) { return n + ' ' + (n === 1 ? singolare : pluraleTesto); }
 
 /* ====================================================================
@@ -552,7 +706,8 @@ function leggiRotta() {
   const p = location.hash.replace(/^#/, '').split('/').map(decodeURIComponent);
   const r = { tab: ['allenamento', 'scheda', 'dati'].indexOf(p[0]) !== -1 ? p[0] : 'allenamento' };
   if (r.tab === 'scheda' && dati) {
-    r.scheda = p[1] ? schedaPerId(p[1]) : null;
+    r.importa = p[1] === 'importa';
+    r.scheda = p[1] && !r.importa ? schedaPerId(p[1]) : null;
     r.giorno = r.scheda && p[2] === 'g' && p[3] ? giornoPerId(r.scheda, p[3]) : null;
     r.nuovo = !!(r.giorno && p[4] === 'nuovo');
     r.voce = r.giorno && p[4] === 'e' && p[5] ? vocePerId(r.giorno, p[5]) : null;
@@ -587,6 +742,7 @@ function disegna() {
   if (rotta.nuovo) return vistaNuovaVoce();
   if (rotta.giorno) return vistaGiorno();
   if (rotta.scheda) return vistaScheda();
+  if (rotta.importa) return vistaImporta();
   return vistaSchede();
 }
 
@@ -639,7 +795,8 @@ function vistaSchede() {
         '<small>' + plurale(s.giorni.length, 'giorno', 'giorni') + '</small></a></li>';
     }).join('') + '</ul>';
   }
-  html += '<button class="btn primario" data-az="scheda-nuova">Nuova scheda</button>';
+  html += '<button class="btn primario" data-az="scheda-nuova">Nuova scheda</button>' +
+    '<a class="btn btn-file" href="#scheda/importa" style="text-decoration:none">Importa scheda da JSON</a>';
   elVista.innerHTML = html;
 }
 
@@ -686,6 +843,61 @@ function vistaGiorno() {
   html += '<h2>Giorno</h2><button class="btn" data-az="giorno-rinomina">Rinomina giorno</button>' +
     '<button class="btn pericolo" data-az="giorno-cancella">Cancella giorno</button>';
   elVista.innerHTML = html;
+}
+
+/* ---- Importazione scheda: testo in lavorazione ed esito dell'ultimo controllo ---- */
+let bozzaImport = { testo: '', errori: null, scheda: null };
+
+function htmlEsitoImport() {
+  const b = bozzaImport;
+  if (b.errori && b.errori.length) {
+    return '<div class="carta errori" role="alert"><strong>Scheda non importata: ' +
+      plurale(b.errori.length, 'problema trovato', 'problemi trovati') + '.</strong><ul>' +
+      b.errori.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>';
+  }
+  if (!b.scheda) return '';
+  let totale = 0;
+  const nuovi = {};
+  let html = '<h2>Anteprima</h2><div class="carta anteprima"><strong>' + esc(b.scheda.nome) + '</strong>';
+  b.scheda.giorni.forEach(function (g) {
+    html += '<h3>' + esc(g.nome) + '</h3>';
+    if (!g.esercizi.length) html += '<small>Nessun esercizio.</small>';
+    html += '<ul>' + g.esercizi.map(function (e) {
+      totale++;
+      const esistente = esercizioPerNome(e.nome);
+      if (!esistente) nuovi[normalizzaNome(e.nome)] = true;
+      return '<li>' + esc(esistente ? esistente.nome : e.nome) + (esistente ? '' : '<span class="nuovo">nuovo</span>') +
+        '<small>' + esc(riassuntoSerie({ serie: e.serie.map(function (r) { return { ripetizioni: r }; }) })) +
+        (e.recupero ? ' · rec. ' + esc(e.recupero) : '') + (e.nota ? ' · ' + esc(e.nota) : '') + '</small></li>';
+    }).join('') + '</ul>';
+  });
+  const quantiNuovi = Object.keys(nuovi).length;
+  html += '</div><p class="tenue">' + plurale(b.scheda.giorni.length, 'giorno', 'giorni') + ', ' + plurale(totale, 'esercizio', 'esercizi') + '. ' +
+    (quantiNuovi ? plurale(quantiNuovi, 'esercizio nuovo verrà aggiunto', 'esercizi nuovi verranno aggiunti') + ' al catalogo; gli altri sono collegati a quelli già esistenti.'
+      : 'Tutti gli esercizi sono già nel catalogo.') + '</p>' +
+    '<button class="btn primario" data-az="imp-conferma">Importa questa scheda</button>' +
+    '<button class="btn" data-az="imp-annulla">Annulla</button>';
+  return html;
+}
+
+function vistaImporta() {
+  testata('Importa scheda', '#scheda');
+  elVista.innerHTML = '<p class="tenue">Incolla il testo JSON della scheda oppure scegli un file. Niente viene salvato prima della tua conferma.</p>' +
+    '<label for="imp-testo">Testo JSON della scheda</label>' +
+    '<textarea id="imp-testo" rows="8" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" ' +
+    'placeholder=\'{ "nome": "Scheda novembre", "giorni": [ ... ] }\'>' + esc(bozzaImport.testo) + '</textarea>' +
+    '<label class="btn btn-file" for="imp-file">Scegli un file</label>' +
+    '<input type="file" id="imp-file" accept=".json,.txt,application/json,text/plain" hidden>' +
+    '<button class="btn primario" data-az="imp-controlla">Controlla la scheda</button>' +
+    '<div id="imp-esito">' + htmlEsitoImport() + '</div>';
+}
+
+function controllaImport(testo) {
+  const esito = analizzaTestoScheda(testo);
+  bozzaImport = { testo: testo, errori: esito.errori, scheda: esito.scheda };
+  disegna();
+  const el = document.getElementById('imp-esito');
+  if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start' });
 }
 
 function vistaNuovaVoce() {
@@ -763,6 +975,21 @@ const AZIONI = {
     const ok = await chiediConferma('Cancellare la scheda?',
       '"' + s.nome + '" con ' + plurale(s.giorni.length, 'giorno', 'giorni') + ' verrà cancellata. Gli allenamenti già registrati restano nello storico.');
     if (ok) { cancellaScheda(s); vai('#scheda'); }
+  },
+
+  'imp-controlla': function () {
+    controllaImport(document.getElementById('imp-testo').value);
+    return false;
+  },
+  'imp-conferma': function () {
+    if (!bozzaImport.scheda) return false;
+    const s = importaSchedaValidata(bozzaImport.scheda);
+    bozzaImport = { testo: '', errori: null, scheda: null };
+    avviso('Scheda "' + s.nome + '" importata.');
+    vai(linkScheda(s));
+  },
+  'imp-annulla': function () {
+    bozzaImport = { testo: '', errori: null, scheda: null };
   },
 
   'giorno-nuovo': async function () {
@@ -851,6 +1078,12 @@ document.addEventListener('click', async function (e) {
 document.addEventListener('input', function (e) {
   const el = e.target;
   if (el.id === 'nv-nome') { document.getElementById('nv-sugg').innerHTML = htmlSuggerimenti(el.value); return; }
+  if (el.id === 'imp-testo') {
+    // Se cambio il testo, l'esito del controllo precedente non vale più.
+    bozzaImport = { testo: el.value, errori: null, scheda: null };
+    document.getElementById('imp-esito').innerHTML = '';
+    return;
+  }
   if (!el.dataset || !el.dataset.campo || !rotta.voce) return;
   if (el.dataset.campo === 'rip') modificaSerie(rotta.voce, Number(el.dataset.i), el.value);
   else modificaCampoVoce(rotta.voce, el.dataset.campo, el.value);
@@ -864,6 +1097,17 @@ elVista.addEventListener('click', function (e) {
   document.getElementById('nv-nome').value = b.dataset.sugg;
   document.getElementById('nv-sugg').innerHTML = '';
   document.getElementById('nv-serie').focus();
+});
+
+// Importazione: lettura del file scelto.
+document.addEventListener('change', function (e) {
+  if (e.target.id !== 'imp-file' || !e.target.files || !e.target.files[0]) return;
+  const file = e.target.files[0];
+  if (file.size > 1000000) { avviso('File troppo grande per essere una scheda (più di 1 MB).', true); return; }
+  const lettore = new FileReader();
+  lettore.onload = function () { controllaImport(String(lettore.result)); };
+  lettore.onerror = function () { avviso('Non riesco a leggere il file scelto.', true); };
+  lettore.readAsText(file);
 });
 
 window.addEventListener('hashchange', function () { disegna(); window.scrollTo(0, 0); });
