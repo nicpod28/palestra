@@ -132,6 +132,9 @@
   .finestra h3 { margin: 0 0 8px; font-size: 19px; }
   .finestra .btn { margin-top: 8px; margin-bottom: 0; }
   .btn-file { display: flex; align-items: center; justify-content: center; font-size: inherit; color: var(--testo); margin: 8px 0; }
+  .allarme { border: 2px solid var(--pericolo); }
+  .allarme strong { color: var(--pericolo); }
+  a.carta { display: block; color: var(--testo); text-decoration: none; min-height: 48px; }
   .errori { border-color: var(--pericolo); }
   .errori strong { color: var(--pericolo); }
   .errori ul { margin: 8px 0 0; padding-left: 20px; }
@@ -174,6 +177,8 @@
 
 const CHIAVE = 'palestra.dati';
 const CHIAVE_ILLEGGIBILI = 'palestra.datiIlleggibili';
+const CHIAVE_COPIA = 'palestra.copiaPrecedente';
+const GIORNI_AVVISO_BACKUP = 14;
 const VERSIONE = 1;
 const MAX_SERIE = 20;
 
@@ -455,6 +460,197 @@ function riassuntoSerie(voce) {
   if (!voce.serie.length) return 'nessuna serie';
   if (serieTutteUguali(voce)) return voce.serie.length + ' × ' + (voce.serie[0].ripetizioni || '?');
   return voce.serie.map(function (s) { return s.ripetizioni || '?'; }).join(' / ');
+}
+
+/* ---- Date ---- */
+
+function dueCifre(n) { return (n < 10 ? '0' : '') + n; }
+
+function dataValida(t) { return typeof t === 'string' && !isNaN(Date.parse(t)); }
+
+// gg/mm/aaaa
+function formattaData(iso) {
+  const d = new Date(iso);
+  return dueCifre(d.getDate()) + '/' + dueCifre(d.getMonth() + 1) + '/' + d.getFullYear();
+}
+
+function formattaDataOra(iso) {
+  const d = new Date(iso);
+  return formattaData(iso) + ' alle ' + dueCifre(d.getHours()) + ':' + dueCifre(d.getMinutes());
+}
+
+// Giorni di calendario passati da una data a oggi.
+function giorniDa(iso, adesso) {
+  const a = new Date(iso), b = adesso || new Date();
+  const g1 = new Date(a.getFullYear(), a.getMonth(), a.getDate());
+  const g2 = new Date(b.getFullYear(), b.getMonth(), b.getDate());
+  return Math.round((g2 - g1) / 86400000);
+}
+
+/* ---- Backup completo ---- */
+
+function nomeFileBackup(data) {
+  return 'palestra-backup-' + data.getFullYear() + '-' + dueCifre(data.getMonth() + 1) + '-' + dueCifre(data.getDate()) + '.json';
+}
+
+function testoBackup() { return JSON.stringify(dati, null, 2); }
+
+function contaDati(d) {
+  return plurale(d.schede.length, 'scheda', 'schede') + ', ' + plurale(d.allenamenti.length, 'allenamento', 'allenamenti') +
+    ', ' + plurale(d.catalogo.length, 'esercizio', 'esercizi') + ' nel catalogo';
+}
+
+// Stato dell'ultimo backup: testo da mostrare e se va evidenziato.
+function statoBackup() {
+  if (!dati.ultimoBackup) {
+    return { testo: 'Ultimo backup: mai fatto', scaduto: dati.schede.length > 0 || dati.allenamenti.length > 0 };
+  }
+  const g = giorniDa(dati.ultimoBackup);
+  const quando = g <= 0 ? 'oggi' : g === 1 ? 'ieri' : g + ' giorni fa';
+  return { testo: 'Ultimo backup: ' + formattaData(dati.ultimoBackup) + ' (' + quando + ')', scaduto: g > GIORNI_AVVISO_BACKUP };
+}
+
+// Controlla che un oggetto sia un backup completo e coerente.
+// Restituisce { errori: [testi], dati: dati pronti da usare oppure null }.
+function validaBackup(o) {
+  if (!eOggetto(o)) return { errori: ['Il file non contiene un backup di Palestra (trovato: ' + mostraValore(o) + ').'], dati: null };
+  if (typeof o.schemaVersion !== 'number') {
+    return { errori: ['Manca il campo "schemaVersion": questo file non è un backup di Palestra.' +
+      (Array.isArray(o.giorni) ? ' Sembra una scheda: importala da Scheda → Importa scheda da JSON.' : '')], dati: null };
+  }
+  if (o.schemaVersion > VERSIONE) {
+    return { errori: ['Questo backup è stato creato da una versione più recente dell\'app (formato ' + o.schemaVersion +
+      ', questa app arriva al formato ' + VERSIONE + '). Aggiorna l\'app e riprova.'], dati: null };
+  }
+  let d;
+  try { d = migra(JSON.parse(JSON.stringify(o))); }
+  catch (e) { return { errori: ['Non riesco ad aggiornare questo backup al formato attuale.'], dati: null }; }
+
+  const errori = [];
+  function err(m) { if (errori.length < 15) errori.push(m); }
+  function testo(v) { return typeof v === 'string'; }
+  function pieno(v) { return typeof v === 'string' && v.trim() !== ''; }
+
+  ['catalogo', 'schede', 'allenamenti'].forEach(function (campo) {
+    if (!Array.isArray(d[campo])) err('Il campo "' + campo + '" manca o non è una lista.');
+  });
+  if (errori.length) return { errori: errori, dati: null };
+
+  const idCatalogo = {};
+  d.catalogo.forEach(function (e, i) {
+    const dove = 'Catalogo, esercizio ' + (i + 1);
+    if (!eOggetto(e) || !pieno(e.id) || !pieno(e.nome)) return err(dove + ': servono "id" e "nome" come testi non vuoti.');
+    if (idCatalogo[e.id]) err(dove + ' ("' + e.nome + '"): "id" ripetuto.');
+    idCatalogo[e.id] = true;
+  });
+
+  const idSchede = {};
+  d.schede.forEach(function (s, i) {
+    let dove = 'Scheda ' + (i + 1);
+    if (!eOggetto(s) || !pieno(s.id) || !pieno(s.nome)) return err(dove + ': servono "id" e "nome" come testi non vuoti.');
+    dove += ' ("' + s.nome + '")';
+    idSchede[s.id] = true;
+    if (!Array.isArray(s.giorni)) return err(dove + ': il campo "giorni" manca o non è una lista.');
+    s.giorni.forEach(function (g, j) {
+      let doveG = dove + ', giorno ' + (j + 1);
+      if (!eOggetto(g) || !pieno(g.id) || !pieno(g.nome)) return err(doveG + ': servono "id" e "nome" come testi non vuoti.');
+      doveG += ' ("' + g.nome + '")';
+      if (!Array.isArray(g.esercizi)) return err(doveG + ': il campo "esercizi" manca o non è una lista.');
+      g.esercizi.forEach(function (v, k) {
+        const doveV = doveG + ', esercizio ' + (k + 1);
+        if (!eOggetto(v) || !pieno(v.id)) return err(doveV + ': manca "id".');
+        if (!idCatalogo[v.esercizioId]) return err(doveV + ': "esercizioId" non corrisponde a nessun esercizio del catalogo.');
+        if (!Array.isArray(v.serie) || !v.serie.every(function (x) { return eOggetto(x) && testo(x.ripetizioni); })) {
+          return err(doveV + ': "serie" deve essere una lista di oggetti con il testo "ripetizioni".');
+        }
+        if (!testo(v.recupero)) v.recupero = '';
+        if (!testo(v.nota)) v.nota = '';
+      });
+    });
+  });
+
+  if (d.schedaAttivaId !== null && d.schedaAttivaId !== undefined && !idSchede[d.schedaAttivaId]) {
+    err('"schedaAttivaId" indica una scheda che nel backup non esiste.');
+  }
+  if (d.schedaAttivaId === undefined) d.schedaAttivaId = null;
+  if (!dataValida(d.ultimoBackup)) d.ultimoBackup = null;
+
+  let inCorso = 0;
+  d.allenamenti.forEach(function (a, i) {
+    const dove = 'Allenamento ' + (i + 1);
+    if (!eOggetto(a) || !pieno(a.id)) return err(dove + ': manca "id".');
+    if (a.stato !== 'in_corso' && a.stato !== 'completato') return err(dove + ': "stato" deve essere "in_corso" oppure "completato" (trovato: ' + mostraValore(a.stato) + ').');
+    if (a.stato === 'in_corso') inCorso++;
+    if (!dataValida(a.inizio)) return err(dove + ': "inizio" non è una data valida.');
+    if (a.stato === 'completato' && !dataValida(a.fine)) return err(dove + ': è completato ma "fine" non è una data valida.');
+    if (!Array.isArray(a.esercizi)) return err(dove + ': il campo "esercizi" manca o non è una lista.');
+    a.esercizi.forEach(function (v, k) {
+      const doveV = dove + ', esercizio ' + (k + 1);
+      if (!eOggetto(v) || !pieno(v.esercizioId) || !pieno(v.nome)) return err(doveV + ': servono "esercizioId" e "nome".');
+      if (!Array.isArray(v.serie)) return err(doveV + ': il campo "serie" manca o non è una lista.');
+      v.serie.forEach(function (x, n) {
+        const doveS = doveV + ', serie ' + (n + 1);
+        if (!eOggetto(x)) return err(doveS + ': deve essere un oggetto.');
+        if (x.carico !== null && !(typeof x.carico === 'number' && isFinite(x.carico) && x.carico >= 0)) {
+          return err(doveS + ': "carico" deve essere un numero non negativo oppure vuoto (trovato: ' + mostraValore(x.carico) + ').');
+        }
+        if (x.ripetizioni !== null && !(typeof x.ripetizioni === 'number' && x.ripetizioni >= 0 && Math.floor(x.ripetizioni) === x.ripetizioni)) {
+          return err(doveS + ': "ripetizioni" deve essere un numero intero non negativo oppure vuoto (trovato: ' + mostraValore(x.ripetizioni) + ').');
+        }
+        if (typeof x.fatta !== 'boolean') return err(doveS + ': "fatta" deve essere true oppure false.');
+        if (!testo(x.target)) x.target = '';
+        if (!testo(x.commento)) x.commento = '';
+      });
+    });
+  });
+  if (inCorso > 1) err('Il backup contiene ' + inCorso + ' allenamenti in corso: ne può esistere uno solo.');
+
+  return { errori: errori, dati: errori.length ? null : d };
+}
+
+function analizzaTestoBackup(testo) {
+  const t = String(testo == null ? '' : testo).replace(/^﻿/, '').trim();
+  if (!t) return { errori: ['Il file è vuoto.'], dati: null };
+  let oggetto;
+  try { oggetto = JSON.parse(t); }
+  catch (e) { return { errori: ['Il file non è un JSON valido: potrebbe essere danneggiato o non essere un backup. (Dettaglio tecnico: ' + e.message + ')'], dati: null }; }
+  return validaBackup(oggetto);
+}
+
+/* ---- Copia precedente (fatta prima di sostituire o cancellare tutto) ---- */
+
+function leggiCopia() {
+  try {
+    const c = JSON.parse(localStorage.getItem(CHIAVE_COPIA));
+    if (!c || !dataValida(c.salvataIl)) return null;
+    c.dati = migra(c.dati);
+    return Array.isArray(c.dati.schede) && Array.isArray(c.dati.allenamenti) && Array.isArray(c.dati.catalogo) ? c : null;
+  } catch (e) { return null; }
+}
+
+function conservaCopia() {
+  try {
+    localStorage.setItem(CHIAVE_COPIA, JSON.stringify({ salvataIl: new Date().toISOString(), dati: dati }));
+    return true;
+  } catch (e) { return false; }
+}
+
+// Sostituisce tutti i dati, tenendo da parte quelli attuali. False se non c'è spazio per la copia.
+function sostituisciDati(nuovi) {
+  if (!conservaCopia()) return false;
+  const vecchi = dati;
+  dati = nuovi;
+  if (salva()) return true;
+  dati = vecchi;
+  return false;
+}
+
+function cancellaTutto() { return sostituisciDati(datiVuoti()); }
+
+// Scambia i dati attuali con la copia precedente (così anche il ripristino è annullabile).
+function ripristinaCopia() {
+  const copia = leggiCopia();
+  return copia ? sostituisciDati(copia.dati) : false;
 }
 
 /* ---- Importazione di una scheda da JSON (formato in FORMATO-SCHEDA.md) ---- */
@@ -772,28 +968,115 @@ function disegnaErrore() {
   }
 }
 
+function htmlBackup(link) {
+  const b = statoBackup();
+  const corpo = '<strong>' + esc(b.testo) + '</strong>' +
+    (b.scaduto ? '<br><span>Fai un backup: se il telefono si rompe perdi tutto quello che non hai esportato.</span>' : '') +
+    (link ? '<br><span class="tenue">Tocca per aprire la sezione Dati.</span>' : '');
+  return link ? '<a href="#dati" class="carta' + (b.scaduto ? ' allarme' : '') + '">' + corpo + '</a>'
+    : '<div class="carta' + (b.scaduto ? ' allarme' : '') + '">' + corpo + '</div>';
+}
+
 function vistaAllenamento() {
   testata('Allenamento');
   const attiva = schedaPerId(dati.schedaAttivaId);
   if (!attiva) {
     elVista.innerHTML = '<div class="carta"><p><strong>Nessuna scheda attiva.</strong></p>' +
       '<p class="tenue">Crea una scheda o scegline una come attiva nella sezione Scheda.</p></div>' +
-      '<a class="btn primario" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#scheda">Vai alla sezione Scheda</a>';
+      '<a class="btn primario" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#scheda">Vai alla sezione Scheda</a>' +
+      htmlBackup(true);
     return;
   }
   elVista.innerHTML = '<h2>Scheda attiva</h2><div class="carta"><strong>' + esc(attiva.nome) + '</strong><br>' +
     '<span class="tenue">' + plurale(attiva.giorni.length, 'giorno', 'giorni') + '</span></div>' +
-    '<p class="tenue">La registrazione degli allenamenti arriva nella Fase 2.</p>';
+    '<p class="tenue">La registrazione degli allenamenti arriva nella Fase 2.</p>' +
+    '<h2>Backup</h2>' + htmlBackup(true);
 }
+
+let erroriBackup = null;
 
 function vistaDati() {
   testata('Dati');
-  elVista.innerHTML = '<div class="carta"><p><strong>I dati sono salvati su questo dispositivo.</strong></p>' +
-    '<p class="tenue">' + plurale(dati.schede.length, 'scheda', 'schede') + ', ' +
-    plurale(dati.catalogo.length, 'esercizio', 'esercizi') + ' nel catalogo.</p></div>' +
-    '<p class="tenue">Esportazione e importazione del backup arrivano nella sotto-fase 1c.</p>' +
-    '<p class="tenue" id="versione-app"></p>';
+  const copia = leggiCopia();
+  let html = '<h2>Backup</h2>' + htmlBackup(false) +
+    '<button class="btn primario" data-az="backup-esporta">Esporta backup</button>' +
+    '<label class="btn btn-file" for="bk-file">Importa backup da file</label>' +
+    '<input type="file" id="bk-file" accept=".json,application/json" hidden>' +
+    '<p class="tenue">Il backup contiene tutto: schede, catalogo e allenamenti. Importarne uno sostituisce tutti i dati attuali, dopo la tua conferma.</p>';
+  if (erroriBackup && erroriBackup.length) {
+    html += '<div class="carta errori" role="alert"><strong>Backup non importato: ' +
+      plurale(erroriBackup.length, 'problema trovato', 'problemi trovati') + '.</strong><ul>' +
+      erroriBackup.map(function (e) { return '<li>' + esc(e) + '</li>'; }).join('') + '</ul></div>';
+  }
+  if (copia) {
+    html += '<h2>Copia precedente</h2><div class="carta">Dati messi da parte il ' + esc(formattaDataOra(copia.salvataIl)) +
+      ', prima dell\'ultima sostituzione o cancellazione.<br><span class="tenue">' + esc(contaDati(copia.dati)) + '.</span></div>' +
+      '<button class="btn" data-az="copia-ripristina">Ripristina la copia precedente</button>';
+  }
+  html += '<h2>Su questo dispositivo</h2><div class="carta">' + esc(contaDati(dati)) + '.' +
+    '<br><span class="tenue" id="versione-app"></span></div>' +
+    '<button class="btn pericolo" data-az="dati-cancella">Cancella tutti i dati</button>';
+  elVista.innerHTML = html;
   mostraVersione();
+}
+
+/* ---- Esportazione: file da scaricare, oppure pannello di condivisione su iPhone ---- */
+
+function eIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function scaricaFile(testo, nome) {
+  const url = URL.createObjectURL(new Blob([testo], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url; a.download = nome; a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { a.remove(); URL.revokeObjectURL(url); }, 1000);
+}
+
+function esportaBackup() {
+  const prima = dati.ultimoBackup;
+  const adesso = new Date();
+  dati.ultimoBackup = adesso.toISOString();
+  if (!salva()) { dati.ultimoBackup = prima; return; }
+  const testo = testoBackup(), nome = nomeFileBackup(adesso);
+
+  // Su iPhone il download diretto non è affidabile nell'app installata: uso "Condividi".
+  if (eIOS() && navigator.share && navigator.canShare) {
+    let file = null;
+    try { file = new File([testo], nome, { type: 'application/json' }); } catch (e) { /* File non disponibile */ }
+    if (file && navigator.canShare({ files: [file] })) {
+      navigator.share({ files: [file] }).then(function () {
+        avviso('Backup esportato: ' + nome);
+        disegna();
+      }).catch(function (e) {
+        // Esportazione non avvenuta: la data dell'ultimo backup torna quella di prima.
+        dati.ultimoBackup = prima; salva(); disegna();
+        avviso(e && e.name === 'AbortError' ? 'Esportazione annullata: nessun backup fatto.' : 'Condivisione non riuscita: nessun backup fatto.', true);
+      });
+      return;
+    }
+  }
+  scaricaFile(testo, nome);
+  avviso('Backup scaricato: ' + nome);
+}
+
+async function proponiBackup(testo) {
+  const esito = analizzaTestoBackup(testo);
+  if (!esito.dati) { erroriBackup = esito.errori; disegna(); return; }
+  erroriBackup = null;
+  const ok = await apriFinestra({
+    titolo: 'Sostituire tutti i dati?',
+    testo: 'Il backup contiene: ' + contaDati(esito.dati) + '. I dati attuali (' + contaDati(dati) +
+      ') verranno sostituiti. Ne conservo una copia che puoi ripristinare da questa sezione.',
+    ok: 'Sostituisci tutti i dati', pericolo: true
+  });
+  if (ok) {
+    if (sostituisciDati(esito.dati)) avviso('Backup importato.');
+    else avviso('Importazione non riuscita: memoria del telefono piena. I dati attuali non sono stati toccati.', true);
+  }
+  disegna();
 }
 
 function vistaSchede() {
@@ -1005,6 +1288,27 @@ const AZIONI = {
     bozzaImport = { testo: '', errori: null, scheda: null };
   },
 
+  'backup-esporta': function () { esportaBackup(); },
+  'copia-ripristina': async function () {
+    const copia = leggiCopia();
+    if (!copia) return false;
+    const ok = await apriFinestra({
+      titolo: 'Ripristinare la copia precedente?',
+      testo: 'Tornano i dati del ' + formattaDataOra(copia.salvataIl) + ' (' + contaDati(copia.dati) +
+        '). I dati attuali prendono il loro posto come copia precedente.',
+      ok: 'Ripristina', pericolo: true
+    });
+    if (!ok) return false;
+    if (ripristinaCopia()) avviso('Copia precedente ripristinata.');
+    else avviso('Ripristino non riuscito: memoria del telefono piena.', true);
+  },
+  'dati-cancella': async function () {
+    if (!await chiediConferma('Cancellare tutti i dati?', 'Verranno cancellati: ' + contaDati(dati) + '.', 'Continua')) return false;
+    if (!await chiediConferma('Sei sicuro?', 'Ultima conferma. L\'app tornerà vuota. Tengo una copia ripristinabile da questa sezione, ma un backup esportato è più sicuro.', 'Cancella tutto')) return false;
+    if (cancellaTutto()) avviso('Tutti i dati sono stati cancellati.');
+    else avviso('Cancellazione non riuscita: memoria del telefono piena.', true);
+  },
+
   'giorno-nuovo': async function () {
     const nome = await chiediNome('Nuovo giorno', 'Nome del giorno', '', 'es. Giorno A - Petto e tricipiti');
     if (nome) { const g = creaGiorno(rotta.scheda, nome); vai(linkGiorno(rotta.scheda, g)); }
@@ -1114,6 +1418,13 @@ elVista.addEventListener('click', function (e) {
 
 // Importazione: lettura del file scelto.
 document.addEventListener('change', function (e) {
+  if (e.target.id === 'bk-file' && e.target.files && e.target.files[0]) {
+    const lettoreBackup = new FileReader();
+    lettoreBackup.onload = function () { proponiBackup(String(lettoreBackup.result)); };
+    lettoreBackup.onerror = function () { avviso('Non riesco a leggere il file scelto.', true); };
+    lettoreBackup.readAsText(e.target.files[0]);
+    return;
+  }
   if (e.target.id !== 'imp-file' || !e.target.files || !e.target.files[0]) return;
   const file = e.target.files[0];
   if (file.size > 1000000) { avviso('File troppo grande per essere una scheda (più di 1 MB).', true); return; }
@@ -1123,7 +1434,7 @@ document.addEventListener('change', function (e) {
   lettore.readAsText(file);
 });
 
-window.addEventListener('hashchange', function () { disegna(); window.scrollTo(0, 0); });
+window.addEventListener('hashchange', function () { erroriBackup = null; disegna(); window.scrollTo(0, 0); });
 
 // Se i dati cambiano in un'altra scheda del browser, li ricarico.
 window.addEventListener('storage', function (e) {
