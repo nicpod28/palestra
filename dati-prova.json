@@ -1,0 +1,2433 @@
+{
+ "schemaVersion": 1,
+ "ultimoBackup": null,
+ "schedaAttivaId": "sch_prova1",
+ "catalogo": [
+  {
+   "id": "es_prova01",
+   "nome": "Panca piana"
+  },
+  {
+   "id": "es_prova02",
+   "nome": "Panca inclinata manubri"
+  },
+  {
+   "id": "es_prova03",
+   "nome": "Croci ai cavi"
+  },
+  {
+   "id": "es_prova04",
+   "nome": "Dip"
+  },
+  {
+   "id": "es_prova05",
+   "nome": "Pushdown ai cavi"
+  },
+  {
+   "id": "es_prova06",
+   "nome": "Trazioni alla sbarra"
+  },
+  {
+   "id": "es_prova07",
+   "nome": "Rematore con bilanciere"
+  },
+  {
+   "id": "es_prova08",
+   "nome": "Lat machine"
+  },
+  {
+   "id": "es_prova09",
+   "nome": "Curl con bilanciere"
+  },
+  {
+   "id": "es_prova10",
+   "nome": "Plank"
+  },
+  {
+   "id": "es_prova11",
+   "nome": "Squat"
+  },
+  {
+   "id": "es_prova12",
+   "nome": "Leg press"
+  },
+  {
+   "id": "es_prova13",
+   "nome": "Leg curl"
+  },
+  {
+   "id": "es_prova14",
+   "nome": "Lento avanti manubri"
+  },
+  {
+   "id": "es_prova15",
+   "nome": "Alzate laterali"
+  }
+ ],
+ "schede": [
+  {
+   "id": "sch_prova1",
+   "nome": "Scheda di prova",
+   "creataIl": "2026-10-18T09:00:00.000Z",
+   "giorni": [
+    {
+     "id": "gio_prova1",
+     "nome": "Giorno A - Petto e tricipiti",
+     "esercizi": [
+      {
+       "id": "ve_prova11",
+       "esercizioId": "es_prova01",
+       "recupero": "90s",
+       "nota": "fermo al petto",
+       "serie": [
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova12",
+       "esercizioId": "es_prova02",
+       "recupero": "90s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "12"
+        },
+        {
+         "ripetizioni": "10"
+        },
+        {
+         "ripetizioni": "8"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova13",
+       "esercizioId": "es_prova03",
+       "recupero": "60s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "12-15"
+        },
+        {
+         "ripetizioni": "12-15"
+        },
+        {
+         "ripetizioni": "12-15"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova14",
+       "esercizioId": "es_prova04",
+       "recupero": "90s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "max"
+        },
+        {
+         "ripetizioni": "max"
+        },
+        {
+         "ripetizioni": "max"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova15",
+       "esercizioId": "es_prova05",
+       "recupero": "60s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "10-12"
+        },
+        {
+         "ripetizioni": "10-12"
+        },
+        {
+         "ripetizioni": "10-12"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gio_prova2",
+     "nome": "Giorno B - Schiena e bicipiti",
+     "esercizi": [
+      {
+       "id": "ve_prova21",
+       "esercizioId": "es_prova06",
+       "recupero": "120s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "max"
+        },
+        {
+         "ripetizioni": "max"
+        },
+        {
+         "ripetizioni": "max"
+        },
+        {
+         "ripetizioni": "max"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova22",
+       "esercizioId": "es_prova07",
+       "recupero": "90s",
+       "nota": "schiena piatta",
+       "serie": [
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova23",
+       "esercizioId": "es_prova08",
+       "recupero": "90s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "12"
+        },
+        {
+         "ripetizioni": "10"
+        },
+        {
+         "ripetizioni": "8"
+        },
+        {
+         "ripetizioni": "8"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova24",
+       "esercizioId": "es_prova09",
+       "recupero": "60s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "10"
+        },
+        {
+         "ripetizioni": "10"
+        },
+        {
+         "ripetizioni": "10"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova25",
+       "esercizioId": "es_prova10",
+       "recupero": "45s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "45s"
+        },
+        {
+         "ripetizioni": "45s"
+        },
+        {
+         "ripetizioni": "45s"
+        }
+       ]
+      }
+     ]
+    },
+    {
+     "id": "gio_prova3",
+     "nome": "Giorno C - Gambe e spalle",
+     "esercizi": [
+      {
+       "id": "ve_prova31",
+       "esercizioId": "es_prova11",
+       "recupero": "150s",
+       "nota": "sotto il parallelo",
+       "serie": [
+        {
+         "ripetizioni": "10"
+        },
+        {
+         "ripetizioni": "8"
+        },
+        {
+         "ripetizioni": "6"
+        },
+        {
+         "ripetizioni": "6"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova32",
+       "esercizioId": "es_prova12",
+       "recupero": "120s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "10-12"
+        },
+        {
+         "ripetizioni": "10-12"
+        },
+        {
+         "ripetizioni": "10-12"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova33",
+       "esercizioId": "es_prova13",
+       "recupero": "60s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "12"
+        },
+        {
+         "ripetizioni": "12"
+        },
+        {
+         "ripetizioni": "12"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova34",
+       "esercizioId": "es_prova14",
+       "recupero": "90s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        },
+        {
+         "ripetizioni": "8-10"
+        }
+       ]
+      },
+      {
+       "id": "ve_prova35",
+       "esercizioId": "es_prova15",
+       "recupero": "45s",
+       "nota": "",
+       "serie": [
+        {
+         "ripetizioni": "15"
+        },
+        {
+         "ripetizioni": "15"
+        },
+        {
+         "ripetizioni": "15"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  }
+ ],
+ "allenamenti": [
+  {
+   "id": "all_prova01",
+   "stato": "completato",
+   "inizio": "2026-10-19T16:30:00.000Z",
+   "fine": "2026-10-19T17:28:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova1",
+   "giornoNome": "Giorno A - Petto e tricipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova01",
+     "nome": "Panca piana",
+     "recupero": "90s",
+     "nota": "fermo al petto",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 60.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 60.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 60.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 60.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova02",
+     "nome": "Panca inclinata manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 22,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 22,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 22,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova03",
+     "nome": "Croci ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 14,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova04",
+     "nome": "Dip",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova05",
+     "nome": "Pushdown ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova02",
+   "stato": "completato",
+   "inizio": "2026-10-21T16:37:00.000Z",
+   "fine": "2026-10-21T17:38:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova2",
+   "giornoNome": "Giorno B - Schiena e bicipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova06",
+     "nome": "Trazioni alla sbarra",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 4,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova07",
+     "nome": "Rematore con bilanciere",
+     "recupero": "90s",
+     "nota": "schiena piatta",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 50.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 50.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 50.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 50.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova08",
+     "nome": "Lat machine",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 55.0,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 55.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 55.0,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 55.0,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova09",
+     "nome": "Curl con bilanciere",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova10",
+     "nome": "Plank",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova03",
+   "stato": "completato",
+   "inizio": "2026-10-23T16:44:00.000Z",
+   "fine": "2026-10-23T17:48:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova3",
+   "giornoNome": "Giorno C - Gambe e spalle",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova11",
+     "nome": "Squat",
+     "recupero": "150s",
+     "nota": "sotto il parallelo",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 80,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 80,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 80,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 80,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova12",
+     "nome": "Leg press",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 140,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 140,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 140,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova13",
+     "nome": "Leg curl",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova14",
+     "nome": "Lento avanti manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 16,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 16,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 16,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 16,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova15",
+     "nome": "Alzate laterali",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova04",
+   "stato": "completato",
+   "inizio": "2026-10-26T16:33:00.000Z",
+   "fine": "2026-10-26T17:31:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova1",
+   "giornoNome": "Giorno A - Petto e tricipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova01",
+     "nome": "Panca piana",
+     "recupero": "90s",
+     "nota": "fermo al petto",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 62.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 62.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 62.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 62.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova02",
+     "nome": "Panca inclinata manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 23,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 23,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 23,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova03",
+     "nome": "Croci ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 14,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 14,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 13,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova04",
+     "nome": "Dip",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 7,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova05",
+     "nome": "Pushdown ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova05",
+   "stato": "completato",
+   "inizio": "2026-10-28T16:40:00.000Z",
+   "fine": "2026-10-28T17:41:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova2",
+   "giornoNome": "Giorno B - Schiena e bicipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova06",
+     "nome": "Trazioni alla sbarra",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 7,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 5,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova07",
+     "nome": "Rematore con bilanciere",
+     "recupero": "90s",
+     "nota": "schiena piatta",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 52.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 52.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 52.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 52.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova08",
+     "nome": "Lat machine",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 57.5,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 57.5,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 57.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 57.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova09",
+     "nome": "Curl con bilanciere",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova10",
+     "nome": "Plank",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova06",
+   "stato": "completato",
+   "inizio": "2026-10-30T16:47:00.000Z",
+   "fine": "2026-10-30T17:51:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova3",
+   "giornoNome": "Giorno C - Gambe e spalle",
+   "nota": "poca energia",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova11",
+     "nome": "Squat",
+     "recupero": "150s",
+     "nota": "sotto il parallelo",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 85,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 85,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 85,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 85,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova12",
+     "nome": "Leg press",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 150,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 150,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 150,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova13",
+     "nome": "Leg curl",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova14",
+     "nome": "Lento avanti manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 17,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 17,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 17,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 17,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova15",
+     "nome": "Alzate laterali",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": null,
+       "commento": "",
+       "fatta": false
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova07",
+   "stato": "completato",
+   "inizio": "2026-11-02T16:36:00.000Z",
+   "fine": "2026-11-02T17:34:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova1",
+   "giornoNome": "Giorno A - Petto e tricipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova01",
+     "nome": "Panca piana",
+     "recupero": "90s",
+     "nota": "fermo al petto",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 65.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 65.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 65.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 65.0,
+       "ripetizioni": 9,
+       "commento": "ultima ripetizione a fatica",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova02",
+     "nome": "Panca inclinata manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 24,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 24,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 24,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova03",
+     "nome": "Croci ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 14,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova04",
+     "nome": "Dip",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova05",
+     "nome": "Pushdown ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova08",
+   "stato": "completato",
+   "inizio": "2026-11-04T16:43:00.000Z",
+   "fine": "2026-11-04T17:44:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova2",
+   "giornoNome": "Giorno B - Schiena e bicipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova06",
+     "nome": "Trazioni alla sbarra",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova07",
+     "nome": "Rematore con bilanciere",
+     "recupero": "90s",
+     "nota": "schiena piatta",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 55.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 55.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 55.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 55.0,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova08",
+     "nome": "Lat machine",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 60.0,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 60.0,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 60.0,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 60.0,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova09",
+     "nome": "Curl con bilanciere",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova10",
+     "nome": "Plank",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova09",
+   "stato": "completato",
+   "inizio": "2026-11-06T16:50:00.000Z",
+   "fine": "2026-11-06T17:54:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova3",
+   "giornoNome": "Giorno C - Gambe e spalle",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova11",
+     "nome": "Squat",
+     "recupero": "150s",
+     "nota": "sotto il parallelo",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 90,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 90,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 90,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 90,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova12",
+     "nome": "Leg press",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 160,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 160,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 160,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova13",
+     "nome": "Leg curl",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova14",
+     "nome": "Lento avanti manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 18,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 18,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 18,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 18,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova15",
+     "nome": "Alzate laterali",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova10",
+   "stato": "completato",
+   "inizio": "2026-11-09T16:39:00.000Z",
+   "fine": "2026-11-09T17:37:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova1",
+   "giornoNome": "Giorno A - Petto e tricipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova01",
+     "nome": "Panca piana",
+     "recupero": "90s",
+     "nota": "fermo al petto",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 67.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 67.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 67.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 67.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova02",
+     "nome": "Panca inclinata manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 25,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 25,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova03",
+     "nome": "Croci ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 14,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 14,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12-15",
+       "carico": 15,
+       "ripetizioni": 13,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova04",
+     "nome": "Dip",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 13,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova05",
+     "nome": "Pushdown ai cavi",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova11",
+   "stato": "completato",
+   "inizio": "2026-11-11T16:46:00.000Z",
+   "fine": "2026-11-11T17:47:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova2",
+   "giornoNome": "Giorno B - Schiena e bicipiti",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova06",
+     "nome": "Trazioni alla sbarra",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 13,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "max",
+       "carico": null,
+       "ripetizioni": 7,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova07",
+     "nome": "Rematore con bilanciere",
+     "recupero": "90s",
+     "nota": "schiena piatta",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 57.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 57.5,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 57.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 57.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova08",
+     "nome": "Lat machine",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 62.5,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 62.5,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 62.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 62.5,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova09",
+     "nome": "Curl con bilanciere",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10",
+       "carico": 25,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova10",
+     "nome": "Plank",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "45s",
+       "carico": null,
+       "ripetizioni": 45,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "all_prova12",
+   "stato": "completato",
+   "inizio": "2026-11-13T16:53:00.000Z",
+   "fine": "2026-11-13T17:57:00.000Z",
+   "schedaId": "sch_prova1",
+   "schedaNome": "Scheda di prova",
+   "giornoId": "gio_prova3",
+   "giornoNome": "Giorno C - Gambe e spalle",
+   "nota": "",
+   "esercizi": [
+    {
+     "esercizioId": "es_prova11",
+     "nome": "Squat",
+     "recupero": "150s",
+     "nota": "sotto il parallelo",
+     "serie": [
+      {
+       "target": "10",
+       "carico": 95,
+       "ripetizioni": 10,
+       "commento": "riscaldamento più lungo",
+       "fatta": true
+      },
+      {
+       "target": "8",
+       "carico": 95,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 95,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "6",
+       "carico": 95,
+       "ripetizioni": 6,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova12",
+     "nome": "Leg press",
+     "recupero": "120s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "10-12",
+       "carico": 170,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 170,
+       "ripetizioni": 11,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "10-12",
+       "carico": 170,
+       "ripetizioni": 10,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova13",
+     "nome": "Leg curl",
+     "recupero": "60s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "12",
+       "carico": 35,
+       "ripetizioni": 12,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova14",
+     "nome": "Lento avanti manubri",
+     "recupero": "90s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "8-10",
+       "carico": 19,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 19,
+       "ripetizioni": 9,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 19,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "8-10",
+       "carico": 19,
+       "ripetizioni": 8,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    },
+    {
+     "esercizioId": "es_prova15",
+     "nome": "Alzate laterali",
+     "recupero": "45s",
+     "nota": "",
+     "serie": [
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      },
+      {
+       "target": "15",
+       "carico": 8,
+       "ripetizioni": 15,
+       "commento": "",
+       "fatta": true
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

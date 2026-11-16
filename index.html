@@ -19,12 +19,14 @@
     --sfondo: #f4f5f7; --carta: #ffffff; --testo: #111418; --tenue: #4d5560;
     --bordo: #c9ced6; --accento: #0b57d0; --su-accento: #ffffff;
     --pericolo: #b3261e; --su-pericolo: #ffffff; --evidenza: #e3ecfb;
+    --fatto: #1a7f37; --su-fatto: #ffffff; --sfondo-fatto: #dff3e4;
   }
   @media (prefers-color-scheme: dark) {
     :root {
       --sfondo: #0e0f12; --carta: #1b1d22; --testo: #f2f3f5; --tenue: #b4bac4;
       --bordo: #474c55; --accento: #8ab4f8; --su-accento: #0a1a33;
       --pericolo: #ffb4ab; --su-pericolo: #4a0d08; --evidenza: #22304a;
+      --fatto: #56d364; --su-fatto: #06250f; --sfondo-fatto: #15301d;
     }
   }
   * { box-sizing: border-box; }
@@ -132,6 +134,27 @@
   .finestra h3 { margin: 0 0 8px; font-size: 19px; }
   .finestra .btn { margin-top: 8px; margin-bottom: 0; }
   .btn-file { display: flex; align-items: center; justify-content: center; font-size: inherit; color: var(--testo); margin: 8px 0; }
+  /* Allenamento in corso */
+  .es-all h3 { margin: 0 0 2px; font-size: 19px; overflow-wrap: anywhere; }
+  .es-all .info { font-size: 14px; color: var(--tenue); margin: 0 0 2px; overflow-wrap: anywhere; }
+  .es-all .ultima { font-size: 14px; margin: 6px 0 10px; padding: 6px 8px; border-radius: 8px; background: var(--evidenza); overflow-wrap: anywhere; }
+  .riga-serie, .intest-serie { display: grid; grid-template-columns: 56px 1fr 1fr 48px 48px; gap: 6px; align-items: center; }
+  .riga-serie { margin-bottom: 6px; }
+  .intest-serie { font-size: 12px; font-weight: 700; color: var(--tenue); text-align: center; margin-bottom: 2px; }
+  .riga-serie .num { font-weight: 700; line-height: 1.15; overflow-wrap: anywhere; }
+  .riga-serie .num small { display: block; font-weight: 400; font-size: 13px; color: var(--tenue); }
+  .riga-serie input[type=text] { text-align: center; padding: 10px 4px; font-size: 18px; font-weight: 600; }
+  .riga-serie.fatta input[type=text] { background: var(--sfondo-fatto); border-color: var(--fatto); }
+  .riga-serie .spunta { font-size: 22px; }
+  .riga-serie.fatta .spunta { background: var(--fatto); color: var(--su-fatto); border-color: var(--fatto); }
+  .icona.con-testo { border-color: var(--accento); color: var(--accento); }
+  .commento-serie { margin: 0 0 10px; }
+  .commento-serie[hidden] { display: none; }
+  input[aria-invalid=true] { border: 2px solid var(--pericolo) !important; }
+  .btn-link { display: flex; align-items: center; justify-content: center; text-decoration: none; }
+  .giorno-avvia { text-align: left; min-height: 64px; }
+  .giorno-avvia small { display: block; font-weight: 400; color: var(--tenue); font-size: 14px; }
+  .giorno-avvia:disabled { opacity: .5; }
   .allarme { border: 2px solid var(--pericolo); }
   .allarme strong { color: var(--pericolo); }
   a.carta { display: block; color: var(--testo); text-decoration: none; min-height: 48px; }
@@ -461,6 +484,120 @@ function riassuntoSerie(voce) {
   if (serieTutteUguali(voce)) return voce.serie.length + ' × ' + (voce.serie[0].ripetizioni || '?');
   return voce.serie.map(function (s) { return s.ripetizioni || '?'; }).join(' / ');
 }
+
+/* ---- Allenamenti ---- */
+
+const MAX_CARICO = 1000, MAX_RIPETIZIONI = 999;
+
+// Carico in kg: virgola o punto. Restituisce { valido, valore } con valore null se il campo è vuoto.
+function leggiCarico(testo) {
+  const t = String(testo == null ? '' : testo).trim();
+  if (!t) return { valido: true, valore: null };
+  if (!/^\d+([.,]\d+)?$/.test(t)) return { valido: false, valore: null };
+  const n = Number(t.replace(',', '.'));
+  return n <= MAX_CARICO ? { valido: true, valore: n } : { valido: false, valore: null };
+}
+
+// Ripetizioni fatte: numero intero. Stesso risultato di leggiCarico.
+function leggiRipetizioni(testo) {
+  const t = String(testo == null ? '' : testo).trim();
+  if (!t) return { valido: true, valore: null };
+  const n = leggiIntero(t, 0, MAX_RIPETIZIONI);
+  return { valido: n !== null, valore: n };
+}
+
+// 62.5 -> "62,5"
+function formattaNumero(n) { return n === null || n === undefined ? '' : String(n).replace('.', ','); }
+
+function allenamentoInCorso() {
+  return dati.allenamenti.find(function (a) { return a.stato === 'in_corso'; }) || null;
+}
+
+function contaSerie(a) {
+  let fatte = 0, totali = 0;
+  a.esercizi.forEach(function (v) { v.serie.forEach(function (x) { totali++; if (x.fatta) fatte++; }); });
+  return { fatte: fatte, totali: totali };
+}
+
+// Quante volte lo stesso esercizio compare prima della posizione data (0 = è la prima).
+function occorrenzaVoce(esercizi, indice) {
+  let n = 0;
+  for (let i = 0; i < indice; i++) if (esercizi[i].esercizioId === esercizi[indice].esercizioId) n++;
+  return n;
+}
+
+// Ultimo allenamento completato in cui l'esercizio ha almeno una serie fatta, da qualsiasi scheda.
+function ultimaVolta(esercizioId, occorrenza) {
+  const completati = dati.allenamenti.filter(function (a) { return a.stato === 'completato'; })
+    .sort(function (a, b) { return Date.parse(b.inizio) - Date.parse(a.inizio); });
+  for (let i = 0; i < completati.length; i++) {
+    const voce = completati[i].esercizi.filter(function (v) { return v.esercizioId === esercizioId; })[occorrenza || 0];
+    if (voce && voce.serie.some(function (x) { return x.fatta; })) return { inizio: completati[i].inizio, serie: voce.serie };
+  }
+  return null;
+}
+
+// "60 × 10 · 62,5 × 8": solo le serie fatte.
+function riassuntoFatte(serie) {
+  return serie.filter(function (x) { return x.fatta; }).map(function (x) {
+    const rip = x.ripetizioni === null ? '?' : x.ripetizioni;
+    return x.carico === null ? rip + ' rip.' : formattaNumero(x.carico) + ' × ' + rip;
+  }).join(' · ');
+}
+
+// Crea l'allenamento con una copia di ciò che la scheda prevede in questo momento.
+// Carico e ripetizioni partono dai valori dell'ultima volta, serie per serie.
+function avviaAllenamento(scheda, giorno) {
+  if (allenamentoInCorso()) return null;
+  const a = {
+    id: nuovoId('all'), stato: 'in_corso', inizio: new Date().toISOString(), fine: null,
+    schedaId: scheda.id, schedaNome: scheda.nome, giornoId: giorno.id, giornoNome: giorno.nome, nota: '',
+    esercizi: giorno.esercizi.map(function (v, i) {
+      const ultima = ultimaVolta(v.esercizioId, occorrenzaVoce(giorno.esercizi, i));
+      return {
+        esercizioId: v.esercizioId, nome: nomeEsercizio(v.esercizioId), recupero: v.recupero, nota: v.nota,
+        serie: v.serie.map(function (x, n) {
+          const prima = ultima && ultima.serie[n] && ultima.serie[n].fatta ? ultima.serie[n] : null;
+          return { target: x.ripetizioni, carico: prima ? prima.carico : null, ripetizioni: prima ? prima.ripetizioni : null, commento: '', fatta: false };
+        })
+      };
+    })
+  };
+  dati.allenamenti.push(a);
+  salva();
+  return a;
+}
+
+function impostaValoreSerie(serie, campo, valore) {
+  if (campo !== 'carico' && campo !== 'ripetizioni' && campo !== 'commento') return;
+  serie[campo] = valore;
+  salva();
+}
+
+function segnaSerie(serie, fatta) { serie.fatta = !!fatta; salva(); }
+
+// Serie in più: parte dai valori della serie precedente, senza target.
+function aggiungiSerieAllenamento(voce) {
+  const ultima = voce.serie[voce.serie.length - 1];
+  voce.serie.push({ target: '', carico: ultima ? ultima.carico : null, ripetizioni: ultima ? ultima.ripetizioni : null, commento: '', fatta: false });
+  salva();
+}
+
+function impostaNotaAllenamento(a, testo) { a.nota = String(testo).trim(); salva(); }
+
+function terminaAllenamento(a) {
+  a.stato = 'completato';
+  a.fine = new Date().toISOString();
+  salva();
+}
+
+function annullaAllenamento(a) {
+  dati.allenamenti = dati.allenamenti.filter(function (x) { return x.id !== a.id; });
+  pulisciCatalogo();
+  salva();
+}
+
+function durataMinuti(a) { return Math.max(0, Math.round((Date.parse(a.fine || new Date().toISOString()) - Date.parse(a.inizio)) / 60000)); }
 
 /* ---- Date ---- */
 
@@ -912,6 +1049,7 @@ function htmlSuggerimenti(testo) {
 function leggiRotta() {
   const p = location.hash.replace(/^#/, '').split('/').map(decodeURIComponent);
   const r = { tab: ['allenamento', 'scheda', 'dati'].indexOf(p[0]) !== -1 ? p[0] : 'allenamento' };
+  r.corso = r.tab === 'allenamento' && p[1] === 'corso' && dati ? allenamentoInCorso() : null;
   if (r.tab === 'scheda' && dati) {
     r.importa = p[1] === 'importa';
     r.scheda = p[1] && !r.importa ? schedaPerId(p[1]) : null;
@@ -944,6 +1082,7 @@ function disegna() {
     if (a.dataset.tab === rotta.tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
   });
   if (rotta.tab === 'dati') return vistaDati();
+  if (rotta.corso) return vistaCorso();
   if (rotta.tab === 'allenamento') return vistaAllenamento();
   if (rotta.voce) return vistaVoce();
   if (rotta.nuovo) return vistaNuovaVoce();
@@ -977,20 +1116,87 @@ function htmlBackup(link) {
     : '<div class="carta' + (b.scaduto ? ' allarme' : '') + '">' + corpo + '</div>';
 }
 
+function oraBreve(iso) { const d = new Date(iso); return dueCifre(d.getHours()) + ':' + dueCifre(d.getMinutes()); }
+
+function testoProgresso(a) {
+  const c = contaSerie(a);
+  return 'Iniziato il ' + formattaData(a.inizio) + ' alle ' + oraBreve(a.inizio) + ' · ' + c.fatte + ' di ' + c.totali + ' serie fatte';
+}
+
 function vistaAllenamento() {
   testata('Allenamento');
+  const inCorso = allenamentoInCorso();
   const attiva = schedaPerId(dati.schedaAttivaId);
-  if (!attiva) {
-    elVista.innerHTML = '<div class="carta"><p><strong>Nessuna scheda attiva.</strong></p>' +
+  let html = '';
+  if (inCorso) {
+    html += '<h2>Allenamento in corso</h2><div class="carta"><strong>' + esc(inCorso.giornoNome) + '</strong><br>' +
+      '<span class="tenue">' + esc(testoProgresso(inCorso)) + '</span></div>' +
+      '<a class="btn primario btn-link" href="#allenamento/corso">Riprendi allenamento</a>';
+  } else if (!attiva) {
+    html += '<div class="carta"><p><strong>Nessuna scheda attiva.</strong></p>' +
       '<p class="tenue">Crea una scheda o scegline una come attiva nella sezione Scheda.</p></div>' +
-      '<a class="btn primario" style="display:flex;align-items:center;justify-content:center;text-decoration:none" href="#scheda">Vai alla sezione Scheda</a>' +
-      htmlBackup(true);
-    return;
+      '<a class="btn primario btn-link" href="#scheda">Vai alla sezione Scheda</a>';
+  } else {
+    html += '<h2>' + esc(attiva.nome) + '</h2>';
+    if (!attiva.giorni.length) html += '<p class="tenue">La scheda attiva non ha giorni. Aggiungili nella sezione Scheda.</p>';
+    else html += '<p class="tenue">Tocca un giorno per iniziare l\'allenamento.</p>';
+    html += attiva.giorni.map(function (g) {
+      return '<button class="btn giorno-avvia" data-az="all-avvia" data-id="' + g.id + '"' + (g.esercizi.length ? '' : ' disabled') + '>' +
+        '<strong>' + esc(g.nome) + '</strong><small>' + (g.esercizi.length ? plurale(g.esercizi.length, 'esercizio', 'esercizi') : 'nessun esercizio') + '</small></button>';
+    }).join('');
   }
-  elVista.innerHTML = '<h2>Scheda attiva</h2><div class="carta"><strong>' + esc(attiva.nome) + '</strong><br>' +
-    '<span class="tenue">' + plurale(attiva.giorni.length, 'giorno', 'giorni') + '</span></div>' +
-    '<p class="tenue">La registrazione degli allenamenti arriva nella Fase 2.</p>' +
-    '<h2>Backup</h2>' + htmlBackup(true);
+  elVista.innerHTML = html + '<h2>Backup</h2>' + htmlBackup(true);
+}
+
+function nomeVoceAllenamento(v) {
+  const e = esercizioPerId(v.esercizioId);
+  return e ? e.nome : v.nome;
+}
+
+function htmlRigaSerie(x, e, n) {
+  const dove = ' data-e="' + e + '" data-s="' + n + '"';
+  return '<div class="riga-serie' + (x.fatta ? ' fatta' : '') + '" id="riga-' + e + '-' + n + '">' +
+    '<div class="num">' + (n + 1) + '<small>' + esc(x.target || 'extra') + '</small></div>' +
+    '<input type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="kg" aria-label="Carico in kg, serie ' + (n + 1) + '" data-all="carico"' + dove + ' value="' + esc(formattaNumero(x.carico)) + '">' +
+    '<input type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" placeholder="rip" aria-label="Ripetizioni fatte, serie ' + (n + 1) + '" data-all="ripetizioni"' + dove + ' value="' + esc(formattaNumero(x.ripetizioni)) + '">' +
+    '<button class="icona spunta" data-az="all-fatta"' + dove + ' aria-pressed="' + (x.fatta ? 'true' : 'false') + '" aria-label="Serie ' + (n + 1) + ' fatta">✓</button>' +
+    '<button class="icona' + (x.commento ? ' con-testo' : '') + '" data-az="all-commento"' + dove + ' aria-label="Commento alla serie ' + (n + 1) + '">✎</button>' +
+    '</div><div class="commento-serie" id="comm-' + e + '-' + n + '"' + (x.commento ? '' : ' hidden') + '>' +
+    '<input type="text" maxlength="200" autocomplete="off" placeholder="Commento alla serie ' + (n + 1) + '" aria-label="Commento alla serie ' + (n + 1) + '" data-all="commento"' + dove + ' value="' + esc(x.commento) + '"></div>';
+}
+
+function vistaCorso() {
+  const a = rotta.corso;
+  testata(a.giornoNome, '#allenamento');
+  let html = '<p class="tenue" id="all-progresso">' + esc(testoProgresso(a)) + '</p>';
+  html += a.esercizi.map(function (v, e) {
+    const ultima = ultimaVolta(v.esercizioId, occorrenzaVoce(a.esercizi, e));
+    return '<div class="carta es-all"><h3>' + esc(nomeVoceAllenamento(v)) + '</h3>' +
+      (v.recupero ? '<p class="info">Recupero: ' + esc(v.recupero) + '</p>' : '') +
+      (v.nota ? '<p class="info">Nota: ' + esc(v.nota) + '</p>' : '') +
+      '<p class="ultima">' + (ultima ? '<strong>Ultima volta (' + formattaData(ultima.inizio) + '):</strong> ' + esc(riassuntoFatte(ultima.serie))
+        : '<strong>Ultima volta:</strong> mai fatto') + '</p>' +
+      '<div class="intest-serie"><span>serie</span><span>kg</span><span>ripetizioni</span><span>fatta</span><span>nota</span></div>' +
+      v.serie.map(function (x, n) { return htmlRigaSerie(x, e, n); }).join('') +
+      '<button class="btn" style="margin:4px 0 0" data-az="all-serie-piu" data-e="' + e + '">Aggiungi una serie</button></div>';
+  }).join('');
+  html += '<div class="carta"><label for="all-nota" style="margin-top:0">Nota sull\'allenamento (facoltativa)</label>' +
+    '<textarea id="all-nota" maxlength="500" data-all="nota" placeholder="es. poca energia, spalla indolenzita">' + esc(a.nota) + '</textarea></div>' +
+    '<button class="btn primario" data-az="all-termina">Termina allenamento</button>' +
+    '<button class="btn pericolo" data-az="all-annulla">Annulla allenamento</button>';
+  elVista.innerHTML = html;
+}
+
+// La serie dell'allenamento in corso a cui si riferisce un pulsante o un campo.
+function serieDa(el) {
+  const a = allenamentoInCorso();
+  const voce = a && a.esercizi[Number(el.dataset.e)];
+  return voce ? voce.serie[Number(el.dataset.s)] || null : null;
+}
+
+function aggiornaProgresso() {
+  const el = document.getElementById('all-progresso'), a = allenamentoInCorso();
+  if (el && a) el.textContent = testoProgresso(a);
 }
 
 let erroriBackup = null;
@@ -1245,6 +1451,8 @@ function vistaVoce() {
 /* ---- Azioni dei pulsanti ---- */
 
 const MSG_SERIE = 'Numero di serie non valido: scrivi un numero intero tra 1 e ' + MAX_SERIE + '.';
+const MSG_CARICO = 'Carico non valido: scrivi i kg come numero, per esempio 22,5. Niente segno meno, lettere o altri simboli.';
+const MSG_RIPFATTE = 'Ripetizioni non valide: scrivi un numero intero, per esempio 8. Niente segno meno, virgole o lettere.';
 const MSG_RIP = 'Scrivi le ripetizioni, per esempio 8-10 oppure max.';
 
 const AZIONI = {
@@ -1307,6 +1515,73 @@ const AZIONI = {
     if (!await chiediConferma('Sei sicuro?', 'Ultima conferma. L\'app tornerà vuota. Tengo una copia ripristinabile da questa sezione, ma un backup esportato è più sicuro.', 'Cancella tutto')) return false;
     if (cancellaTutto()) avviso('Tutti i dati sono stati cancellati.');
     else avviso('Cancellazione non riuscita: memoria del telefono piena.', true);
+  },
+
+  'all-avvia': function (b) {
+    const scheda = schedaPerId(dati.schedaAttivaId);
+    const giorno = scheda && giornoPerId(scheda, b.dataset.id);
+    if (!giorno) return false;
+    if (!avviaAllenamento(scheda, giorno)) { avviso('C\'è già un allenamento in corso: riprendilo o annullalo.', true); return; }
+    vai('#allenamento/corso');
+  },
+  'all-fatta': function (b) {
+    const serie = serieDa(b);
+    if (!serie) return false;
+    const riga = b.closest('.riga-serie');
+    if (!serie.fatta) {
+      // Prima di segnare la serie controllo i due campi così come sono scritti.
+      const campoCarico = riga.querySelector('[data-all=carico]'), campoRip = riga.querySelector('[data-all=ripetizioni]');
+      const carico = leggiCarico(campoCarico.value), rip = leggiRipetizioni(campoRip.value);
+      campoCarico.setAttribute('aria-invalid', carico.valido ? 'false' : 'true');
+      campoRip.setAttribute('aria-invalid', rip.valido && rip.valore !== null ? 'false' : 'true');
+      if (!carico.valido) { avviso(MSG_CARICO, true); return false; }
+      if (!rip.valido) { avviso(MSG_RIPFATTE, true); return false; }
+      if (rip.valore === null) { avviso('Scrivi le ripetizioni fatte prima di segnare la serie.', true); return false; }
+      serie.carico = carico.valore; serie.ripetizioni = rip.valore;
+    }
+    segnaSerie(serie, !serie.fatta);
+    riga.classList.toggle('fatta', serie.fatta);
+    b.setAttribute('aria-pressed', serie.fatta ? 'true' : 'false');
+    aggiornaProgresso();
+    return false;
+  },
+  'all-commento': function (b) {
+    const box = document.getElementById('comm-' + b.dataset.e + '-' + b.dataset.s);
+    box.hidden = !box.hidden;
+    if (!box.hidden) box.querySelector('input').focus();
+    return false;
+  },
+  'all-serie-piu': function (b) {
+    const a = allenamentoInCorso(), voce = a && a.esercizi[Number(b.dataset.e)];
+    if (!voce) return false;
+    if (voce.serie.length >= MAX_SERIE) { avviso('Massimo ' + MAX_SERIE + ' serie per esercizio.', true); return false; }
+    aggiungiSerieAllenamento(voce);
+  },
+  'all-termina': async function () {
+    const a = allenamentoInCorso();
+    if (!a) return false;
+    const c = contaSerie(a), mancanti = c.totali - c.fatte;
+    if (mancanti > 0) {
+      const ok = await apriFinestra({
+        titolo: 'Terminare l\'allenamento?',
+        testo: (mancanti === 1 ? 'C\'è 1 serie non segnata come fatta: non verrà contata' : 'Ci sono ' + mancanti + ' serie non segnate come fatte: non verranno contate') + ' nello storico.',
+        ok: 'Termina lo stesso'
+      });
+      if (!ok) return false;
+    }
+    terminaAllenamento(a);
+    avviso('Allenamento salvato: ' + plurale(c.fatte, 'serie fatta', 'serie fatte') + ' in ' + durataMinuti(a) + ' min.');
+    vai('#allenamento');
+  },
+  'all-annulla': async function () {
+    const a = allenamentoInCorso();
+    if (!a) return false;
+    const c = contaSerie(a);
+    const ok = await chiediConferma('Annullare l\'allenamento?',
+      'L\'allenamento in corso verrà cancellato' + (c.fatte ? ', comprese le ' + c.fatte + ' serie già fatte' : '') + '. Non comparirà nello storico.', 'Annulla allenamento');
+    if (!ok) return false;
+    annullaAllenamento(a);
+    vai('#allenamento');
   },
 
   'giorno-nuovo': async function () {
@@ -1395,6 +1670,27 @@ document.addEventListener('click', async function (e) {
 document.addEventListener('input', function (e) {
   const el = e.target;
   if (el.id === 'nv-nome') { document.getElementById('nv-sugg').innerHTML = htmlSuggerimenti(el.value); return; }
+  if (el.dataset && el.dataset.all) {
+    // Allenamento in corso: salvo a ogni tasto i valori validi.
+    const a = allenamentoInCorso();
+    if (!a) return;
+    if (el.dataset.all === 'nota') { impostaNotaAllenamento(a, el.value); controllaSalvataggio(); return; }
+    const serie = serieDa(el);
+    if (!serie) return;
+    if (el.dataset.all === 'commento') {
+      impostaValoreSerie(serie, 'commento', el.value.trim());
+      const matita = document.querySelector('[data-az=all-commento][data-e="' + el.dataset.e + '"][data-s="' + el.dataset.s + '"]');
+      if (matita) matita.classList.toggle('con-testo', !!serie.commento);
+    } else {
+      const letto = el.dataset.all === 'carico' ? leggiCarico(el.value) : leggiRipetizioni(el.value);
+      // Un valore a metà (es. "22,") non viene salvato né segnalato finché non esco dal campo.
+      if (!letto.valido) return;
+      el.setAttribute('aria-invalid', 'false');
+      impostaValoreSerie(serie, el.dataset.all, letto.valore);
+    }
+    controllaSalvataggio();
+    return;
+  }
   if (el.id === 'imp-testo') {
     // Se cambio il testo, l'esito del controllo precedente non vale più.
     bozzaImport = { testo: el.value, errori: null, scheda: null };
@@ -1418,6 +1714,14 @@ elVista.addEventListener('click', function (e) {
 
 // Importazione: lettura del file scelto.
 document.addEventListener('change', function (e) {
+  // Allenamento: uscendo da un campo numerico segnalo il valore non valido.
+  const campo = e.target.dataset ? e.target.dataset.all : null;
+  if (campo === 'carico' || campo === 'ripetizioni') {
+    const letto = campo === 'carico' ? leggiCarico(e.target.value) : leggiRipetizioni(e.target.value);
+    e.target.setAttribute('aria-invalid', letto.valido ? 'false' : 'true');
+    if (!letto.valido) avviso(campo === 'carico' ? MSG_CARICO : MSG_RIPFATTE, true);
+    return;
+  }
   if (e.target.id === 'bk-file' && e.target.files && e.target.files[0]) {
     const lettoreBackup = new FileReader();
     lettoreBackup.onload = function () { proponiBackup(String(lettoreBackup.result)); };
